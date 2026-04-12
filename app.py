@@ -1,7 +1,11 @@
 import sys
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import QWidget, QPushButton, QFileDialog, QApplication, QMainWindow, QLabel
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QColor, QPainter, QPen
+from PySide6.QtCore import Qt, QPoint
+from PySide6.QtCore import Qt, QPoint, Signal
+from PySide6.QtWidgets import QColorDialog
+
 class Drawable(QWidget):
     def __init__(self):
         super().__init__()
@@ -12,6 +16,9 @@ class Drawable(QWidget):
         self.openFileButton.clicked.connect(self.openFile)
         self.canvas = Canvas()
         self.layout.addWidget(self.canvas)
+        self.color_wheel = ColorWheel()
+        self.color_wheel.color_change.connect(self.canvas.set_color)
+        self.layout.addWidget(self.color_wheel)
 
     @QtCore.Slot()
     def openFile(self):
@@ -53,7 +60,32 @@ class Canvas(QWidget):
 
     def paintEvent(self, event):
         QPainter(self).drawImage(self.rect(), self.image, self.image.rect())
+
+    def set_color(self, color):
+        self.pen_color = color
+
+
+class ColorWheel(QWidget):
+    color_change = Signal(QColor)
     
+    def __init__(self):
+        super().__init__()
+        self.setMaximumHeight(30)
+        self.current_color = QColor(Qt.black)
+
+        self.color_button = QPushButton("Choose Color")
+        self.color_button.setFixedSize(150, 30)
+        self.color_button.clicked.connect(self.choose_color)
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(1,1,1,1)
+        layout.addWidget(self.color_button)
+    
+    def choose_color(self):
+        color = QColorDialog.getColor(self.current_color, self)
+        if color.isValid():
+            self.current_color = color
+            self.color_change.emit(color)
 
 if __name__=="__main__":
     app = QApplication([])
