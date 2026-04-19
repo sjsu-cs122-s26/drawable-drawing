@@ -1,5 +1,4 @@
 from typing import override
-from collections import deque
 
 from widgets.tools.base_tool import BaseTool
 
