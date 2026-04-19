@@ -33,6 +33,12 @@ class Canvas(QWidget):
     def set_active_tool(self, tool_name):
         self.current_tool = self.tools[tool_name]
 
+    def load_image(self, path):
+        loaded = QImage(path)
+        self.image = loaded.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.update()
+
+
     @override
     def paintEvent(self, event):
         QPainter(self).drawImage(self.rect(), self.image, self.image.rect())
@@ -61,3 +67,5 @@ class Canvas(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = False
             self.current_tool.on_mouse_release(self, event)
+    
+    
