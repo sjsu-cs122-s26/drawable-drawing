@@ -19,6 +19,10 @@ class Canvas(QWidget):
     def set_color(self, color):
         self.color = color
 
+    def clear(self):
+        self.image.fill(Qt.GlobalColor.white)
+        self.update()
+
     def define_tools(self):
         self.tools = {
             "pen": PenTool(),

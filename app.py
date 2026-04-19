@@ -8,10 +8,12 @@ from PySide6.QtWidgets import (
     QLabel, 
     QVBoxLayout, 
     QToolBar,
+    QHBoxLayout
 )
 
 from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
+from widgets.clear import Clear
 
 class Drawable(QMainWindow):
     def __init__(self):
@@ -34,6 +36,19 @@ class Drawable(QMainWindow):
         self.color_wheel = ColorWheel()
         self.color_wheel.color_change.connect(self.canvas.set_color)
         self.main_layout.addWidget(self.color_wheel)
+
+        self.clear = Clear()
+        self.clear.cleared.connect(self.canvas.clear)
+        self.main_layout.addWidget(self.clear)
+
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(0, 0, 0, 0)
+        bottom_layout.setSpacing(0)
+        bottom_layout.addWidget(self.color_wheel)
+        bottom_layout.addWidget(self.clear)
+        bottom_layout.addStretch()
+        self.main_layout.addLayout(bottom_layout)
+
 
     def create_menus(self):
         menu_bar = self.menuBar()
