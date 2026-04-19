@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QColor, QPainter, QImage
 from PySide6.QtCore import Qt, QPoint
 
-from widgets.tools.PenTool import PenTool
+from widgets.tools.pen_tool import PenTool
 
 class Canvas(QWidget):
     def __init__(self):
@@ -18,10 +18,10 @@ class Canvas(QWidget):
         print(self.image.size())
         print(self.rect().size())
         
-    def setColor(self, color):
+    def set_color(self, color):
         self.color = color
 
-    def defineTools(self):
+    def define_tools(self):
         self.tools = {
             "pen": PenTool()
         }
@@ -38,17 +38,20 @@ class Canvas(QWidget):
             self.image.fill(Qt.GlobalColor.white)
         super().showEvent(event)
 
+    @override
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = True
             self.last_point = event.position().toPoint()
-            self.current_tool.onMousePress(self, event)
+            self.current_tool.on_mouse_press(self, event)
     
+    @override
     def mouseMoveEvent(self, event):
         if self.drawing and (event.buttons() & Qt.MouseButton.LeftButton):
-            self.current_tool.onMouseMove(self, event)
+            self.current_tool.on_mouse_move(self, event)
 
+    @override
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = False
-            self.current_tool.onMouseRelease(self, event)
+            self.current_tool.on_mouse_release(self, event)

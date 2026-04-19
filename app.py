@@ -36,7 +36,7 @@ class Drawable(QMainWindow):
         self.main_layout.addWidget(self.canvas)
 
         self.color_wheel = ColorWheel()
-        self.color_wheel.color_change.connect(self.canvas.setColor)
+        self.color_wheel.color_change.connect(self.canvas.set_color)
         self.main_layout.addWidget(self.color_wheel)
 
     def create_menus(self):
