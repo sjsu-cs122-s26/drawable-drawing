@@ -3,7 +3,7 @@ from typing import override
 from PySide6.QtGui import QPainter, QPen
 from PySide6.QtCore import Qt
 
-from widgets.tools.base_tool import BaseTool
+from core.tools.base_tool import BaseTool
 
 class PenTool(BaseTool):
     def __init__(self):

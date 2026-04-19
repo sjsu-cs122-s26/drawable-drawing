@@ -4,8 +4,8 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QColor, QPainter, QImage
 from PySide6.QtCore import Qt, QPoint
 
-from widgets.bucket_tool import BucketTool
-from widgets.tools.pen_tool import PenTool
+from core.tools.bucket_tool import BucketTool
+from core.tools.pen_tool import PenTool
 
 class Canvas(QWidget):
     def __init__(self):

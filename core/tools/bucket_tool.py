@@ -1,6 +1,6 @@
 from typing import override
 
-from widgets.tools.base_tool import BaseTool
+from core.tools.base_tool import BaseTool
 
 class BucketTool(BaseTool):
     @override
