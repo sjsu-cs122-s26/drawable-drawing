@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt, QPoint
 
 from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
+from core.tools.none_tool import NoneTool
 
 class Canvas(QWidget):
     def __init__(self):
@@ -25,10 +26,11 @@ class Canvas(QWidget):
 
     def define_tools(self):
         self.tools = {
+            "none": NoneTool(),
             "pen": PenTool(),
             "bucket": BucketTool()
         }
-        self.current_tool = self.tools["pen"]
+        self.current_tool = self.tools["none"]
 
     def set_active_tool(self, tool_name):
         self.current_tool = self.tools[tool_name]
