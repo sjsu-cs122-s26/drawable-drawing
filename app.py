@@ -75,7 +75,5 @@ class Drawable(QMainWindow):
         if not dialog.exec():
             return
         fileName = dialog.selectedFiles()[0]
-        label = QLabel(self)
-        label.setPixmap(QPixmap(fileName))
-        self.main_layout.addWidget(label)
+        self.canvas.load_image(fileName)
     
