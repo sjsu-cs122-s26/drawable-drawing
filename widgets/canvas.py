@@ -1,10 +1,10 @@
 from typing import override
 
-from PySide6 import QtGui
 from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QColor, QPainter, QImage
 from PySide6.QtCore import Qt, QPoint
 
+from widgets.bucket_tool import BucketTool
 from widgets.tools.pen_tool import PenTool
 
 class Canvas(QWidget):
@@ -21,7 +21,8 @@ class Canvas(QWidget):
 
     def define_tools(self):
         self.tools = {
-            "pen": PenTool()
+            "pen": PenTool(),
+            "bucket": BucketTool()
         }
         self.current_tool = self.tools["pen"]
 
