@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QPoint
 
 from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
-from core.tools.none_tool import NoneTool
+from core.tools.base_tool import BaseTool
 
 class Canvas(QWidget):
     def __init__(self):
@@ -26,20 +26,26 @@ class Canvas(QWidget):
 
     def define_tools(self):
         self.tools = {
-            "none": NoneTool(),
             "pen": PenTool(),
             "bucket": BucketTool()
         }
-        self.current_tool = self.tools["none"]
+        self.current_tool = None
 
     def set_active_tool(self, tool_name):
-        self.current_tool = self.tools[tool_name]
+        if self.current_tool!=self.tools[tool_name]:
+            self.current_tool = self.tools[tool_name]
+        else: #If button currently active is toggled, then it is deactivated.
+            self.current_tool = None
 
     def load_image(self, path):
         loaded = QImage(path)
         self.image = loaded.scaled(self.size(), Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.update()
 
+    def save_image(self, path):
+        image = QImage(self.size(), QImage.Format.Format_ARGB32)
+        self.render(image)
+        image.save(path)
 
     @override
     def paintEvent(self, event):
@@ -54,19 +60,19 @@ class Canvas(QWidget):
 
     @override
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
             self.drawing = True
             self.last_point = event.position().toPoint()
             self.current_tool.on_mouse_press(self, event)
     
     @override
     def mouseMoveEvent(self, event):
-        if self.drawing and (event.buttons() & Qt.MouseButton.LeftButton):
+        if self.drawing and (event.buttons() & Qt.MouseButton.LeftButton) and self.current_tool:
             self.current_tool.on_mouse_move(self, event)
 
     @override
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
             self.drawing = False
             self.current_tool.on_mouse_release(self, event)
     

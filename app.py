@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QPixmap, QAction
+from PySide6.QtGui import QPixmap, QAction, QIcon, QActionGroup
 from PySide6.QtWidgets import (
     QMainWindow, 
     QWidget, 
@@ -19,6 +19,8 @@ class Drawable(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Drawable")
+        icon = QIcon("media/drawable_icon.jpg")
+        self.setWindowIcon(icon)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -58,22 +60,40 @@ class Drawable(QMainWindow):
         
         self.open_file_action = QAction("Open File")
         self.open_file_action.setShortcut("Ctrl+O")
-        self.open_file_action.setStatusTip("Open a file")
+        self.open_file_action.setStatusTip("Open an image file")
         self.open_file_action.triggered.connect(self.openFile)
         file_menu.addAction(self.open_file_action)
+
+        self.save_file_action = QAction("Save File")
+        self.save_file_action.setShortcut("Ctrl+S")
+        self.save_file_action.setStatusTip("Save currnet canvas as an image file")
+        self.save_file_action.triggered.connect(self.saveFile)
+        file_menu.addAction(self.save_file_action)
+
         
     def register_toolbar_widgets(self, toolbar: QToolBar):
+        self.group = QActionGroup(self)
+        self.group.setExclusionPolicy(QActionGroup.ExclusionPolicy.ExclusiveOptional)
         for tool_name in self.canvas.tools.keys():
             action = toolbar.addAction(tool_name.capitalize())
             action.setCheckable(True)
             action.triggered.connect(lambda checked, name=tool_name: self.canvas.set_active_tool(name))
+            self.group.addAction(action)
+
 
     @Slot()
     def openFile(self):
         dialog = QFileDialog(self)
-        dialog.setNameFilter(("Images (*.png *.jpg)")) #temporary feature to display images. will later be updated to load a previously saved QPainter state
+        dialog.setNameFilter(("Images (*.png *.jpg)"))
         if not dialog.exec():
             return
         fileName = dialog.selectedFiles()[0]
         self.canvas.load_image(fileName)
     
+    @Slot()
+    def saveFile(self):
+        dialog = QFileDialog(self)
+        fileName = dialog.getSaveFileName(filter=("Images (*.png)"))[0]
+        if not fileName:
+            return
+        self.canvas.save_image(fileName)
