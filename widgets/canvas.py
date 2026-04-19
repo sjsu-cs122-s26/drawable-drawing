@@ -14,9 +14,7 @@ class Canvas(QWidget):
         self.color = QColor(Qt.GlobalColor.black)
         self.last_point = QPoint()
         self.drawing = False
-        self.current_tool = PenTool()
-        print(self.image.size())
-        print(self.rect().size())
+        self.define_tools()
         
     def set_color(self, color):
         self.color = color
@@ -26,6 +24,9 @@ class Canvas(QWidget):
             "pen": PenTool()
         }
         self.current_tool = self.tools["pen"]
+
+    def set_active_tool(self, tool_name):
+        self.current_tool = self.tools[tool_name]
 
     @override
     def paintEvent(self, event):

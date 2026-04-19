@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QPixmap, QAction
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QMainWindow, 
     QWidget, 
@@ -24,9 +24,6 @@ class Drawable(QMainWindow):
 
         self.create_menus()
 
-        toolbar = QToolBar("Main Toolbar")
-        self.addToolBar(toolbar)
-
         self.openFileButton = QPushButton("Open File")
 
         self.main_layout.addWidget(self.openFileButton)
@@ -34,6 +31,10 @@ class Drawable(QMainWindow):
 
         self.canvas = Canvas()
         self.main_layout.addWidget(self.canvas)
+        
+        toolbar = QToolBar("Toolbar")
+        self.register_toolbar_widgets(toolbar)
+        self.addToolBar(toolbar)
 
         self.color_wheel = ColorWheel()
         self.color_wheel.color_change.connect(self.canvas.set_color)
@@ -44,8 +45,11 @@ class Drawable(QMainWindow):
         file_menu = menu_bar.addMenu("&File")
         help_menu = menu_bar.addMenu("&Help")
         
-    def register_toolbar_widgets(self):
-        pass
+    def register_toolbar_widgets(self, toolbar: QToolBar):
+        for tool_name in self.canvas.tools.keys():
+            action = toolbar.addAction(tool_name.capitalize())
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, name=tool_name: self.canvas.set_active_tool(name))
 
     @Slot()
     def openFile(self):
