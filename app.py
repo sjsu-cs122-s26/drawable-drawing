@@ -11,14 +11,14 @@ class Drawable(QWidget):
         super().__init__()
         self.setWindowTitle("Drawable")
         self.openFileButton = QPushButton("Open File")
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.openFileButton)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.main_layout.addWidget(self.openFileButton)
         self.openFileButton.clicked.connect(self.openFile)
         self.canvas = Canvas()
-        self.layout.addWidget(self.canvas)
+        self.main_layout.addWidget(self.canvas)
         self.color_wheel = ColorWheel()
         self.color_wheel.color_change.connect(self.canvas.set_color)
-        self.layout.addWidget(self.color_wheel)
+        self.main_layout.addWidget(self.color_wheel)
 
     @QtCore.Slot()
     def openFile(self):
@@ -29,33 +29,33 @@ class Drawable(QWidget):
         fileName = dialog.selectedFiles()[0]
         label = QLabel(self)
         label.setPixmap(QPixmap(fileName))
-        self.layout.addWidget(label)
+        self.main_layout.addWidget(label)
         
 class Canvas(QWidget):
     def __init__(self):
         super().__init__()
-        self.image = QtGui.QImage(800, 500, QtGui.QImage.Format_ARGB32)
-        self.image.fill(Qt.white)
+        self.image = QtGui.QImage(800, 500, QtGui.QImage.Format.Format_ARGB32)
+        self.image.fill(Qt.GlobalColor.white)
         self.last_point = QPoint()
         self.drawing = False
-        self.pen_color = QColor(Qt.black)
+        self.pen_color = QColor(Qt.GlobalColor.black)
         self.pen_width = 3
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = True
             self.last_point = event.position().toPoint()
     
     def mouseMoveEvent(self, event):
-        if self.drawing and (event.buttons() & Qt.LeftButton):
+        if self.drawing and (event.buttons() & Qt.MouseButton.LeftButton):
             painter = QPainter(self.image)
-            painter.setPen(QPen(self.pen_color, self.pen_width, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            painter.setPen(QPen(self.pen_color, self.pen_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
             painter.drawLine(self.last_point, event.position().toPoint())
             self.last_point = event.position().toPoint()
             self.update()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = False
 
     def paintEvent(self, event):
@@ -71,7 +71,7 @@ class ColorWheel(QWidget):
     def __init__(self):
         super().__init__()
         self.setMaximumHeight(30)
-        self.current_color = QColor(Qt.black)
+        self.current_color = QColor(Qt.GlobalColor.black)
 
         self.color_button = QPushButton("Choose Color")
         self.color_button.setFixedSize(150, 30)
