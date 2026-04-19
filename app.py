@@ -1,6 +1,14 @@
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QFileDialog, QLabel
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Slot
+from PySide6.QtGui import QPixmap, QAction
+from PySide6.QtWidgets import (
+    QMainWindow, 
+    QWidget, 
+    QPushButton, 
+    QFileDialog, 
+    QLabel, 
+    QVBoxLayout, 
+    QToolBar,
+)
 
 from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
@@ -12,7 +20,12 @@ class Drawable(QMainWindow):
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-        self.main_layout = QtWidgets.QVBoxLayout(self.central_widget)
+        self.main_layout = QVBoxLayout(self.central_widget)
+
+        self.create_menus()
+
+        toolbar = QToolBar("Main Toolbar")
+        self.addToolBar(toolbar)
 
         self.openFileButton = QPushButton("Open File")
 
@@ -23,10 +36,18 @@ class Drawable(QMainWindow):
         self.main_layout.addWidget(self.canvas)
 
         self.color_wheel = ColorWheel()
-        self.color_wheel.color_change.connect(self.canvas.set_color)
+        self.color_wheel.color_change.connect(self.canvas.setColor)
         self.main_layout.addWidget(self.color_wheel)
 
-    @QtCore.Slot()
+    def create_menus(self):
+        menu_bar = self.menuBar()
+        file_menu = menu_bar.addMenu("&File")
+        help_menu = menu_bar.addMenu("&Help")
+        
+    def register_toolbar_widgets(self):
+        pass
+
+    @Slot()
     def openFile(self):
         dialog = QFileDialog(self)
         dialog.setNameFilter(("Images (*.png *.jpg)")) #temporary feature to display images. will later be updated to load a previously saved QPainter state
