@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtWidgets import (
     QMainWindow, 
     QWidget, 
@@ -24,11 +24,6 @@ class Drawable(QMainWindow):
 
         self.create_menus()
 
-        self.openFileButton = QPushButton("Open File")
-
-        self.main_layout.addWidget(self.openFileButton)
-        self.openFileButton.clicked.connect(self.openFile)
-
         self.canvas = Canvas()
         self.main_layout.addWidget(self.canvas)
         
@@ -42,8 +37,15 @@ class Drawable(QMainWindow):
 
     def create_menus(self):
         menu_bar = self.menuBar()
+        
         file_menu = menu_bar.addMenu("&File")
         help_menu = menu_bar.addMenu("&Help")
+        
+        self.open_file_action = QAction("Open File")
+        self.open_file_action.setShortcut("Ctrl+O")
+        self.open_file_action.setStatusTip("Open a file")
+        self.open_file_action.triggered.connect(self.openFile)
+        file_menu.addAction(self.open_file_action)
         
     def register_toolbar_widgets(self, toolbar: QToolBar):
         for tool_name in self.canvas.tools.keys():
