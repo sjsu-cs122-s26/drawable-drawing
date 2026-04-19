@@ -7,7 +7,6 @@ from widgets.tools.base_tool import BaseTool
 
 class PenTool(BaseTool):
     def __init__(self):
-        super().__init__()
         self.pen_width = 3
     
     @override
