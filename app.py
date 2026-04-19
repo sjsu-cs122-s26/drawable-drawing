@@ -1,16 +1,20 @@
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtWidgets import QWidget, QPushButton, QFileDialog, QLabel
+from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QFileDialog, QLabel
 from PySide6.QtGui import QPixmap
 
 from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
 
-class Drawable(QWidget):
+class Drawable(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Drawable")
+
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.main_layout = QtWidgets.QVBoxLayout(self.central_widget)
+
         self.openFileButton = QPushButton("Open File")
-        self.main_layout = QtWidgets.QVBoxLayout(self)
 
         self.main_layout.addWidget(self.openFileButton)
         self.openFileButton.clicked.connect(self.openFile)
