@@ -8,7 +8,8 @@ from PySide6.QtWidgets import (
     QLabel, 
     QVBoxLayout, 
     QToolBar,
-    QHBoxLayout
+    QHBoxLayout,
+    QScrollArea
 )
 
 from widgets.color_wheel import ColorWheel
@@ -25,11 +26,12 @@ class Drawable(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
-
         self.create_menus()
 
         self.canvas = Canvas()
-        self.main_layout.addWidget(self.canvas)
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidget(self.canvas)
+        self.main_layout.addWidget(self.scrollArea)
         
         toolbar = QToolBar("Toolbar")
         self.register_toolbar_widgets(toolbar)

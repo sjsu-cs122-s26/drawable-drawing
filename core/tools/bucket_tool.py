@@ -11,7 +11,7 @@ class BucketTool(BaseTool):
         if not canvas.image.rect().contains(start_point):
             return
 
-        target_color = canvas.image.pixel(x, y)
+        target_color = canvas.image.pixelColor(x, y)
         fill_color = canvas.color.rgba()
 
         if target_color == fill_color:
@@ -25,14 +25,14 @@ class BucketTool(BaseTool):
             curr_x, curr_y = stack.pop()
 
             lx = curr_x
-            while lx >= 0 and canvas.image.pixel(lx, curr_y) == target_color:
-                canvas.image.setPixel(lx, curr_y, fill_color)
+            while lx >= 0 and canvas.image.pixelColor(lx, curr_y) == target_color:
+                canvas.image.setPixelColor(lx, curr_y, fill_color)
                 lx -= 1
             lx += 1
 
             rx = curr_x + 1
-            while rx < width and canvas.image.pixel(rx, curr_y) == target_color:
-                canvas.image.setPixel(rx, curr_y, fill_color)
+            while rx < width and canvas.image.pixelColor(rx, curr_y) == target_color:
+                canvas.image.setPixelColor(rx, curr_y, fill_color)
                 rx += 1
             rx -= 1
 
@@ -46,7 +46,7 @@ class BucketTool(BaseTool):
     def _scan_line(self, lx, rx, y, stack, canvas, target_color):
         added_seed = False
         for x in range(lx, rx + 1):
-            if canvas.image.pixel(x, y) == target_color:
+            if canvas.image.pixelColor(x, y) == target_color:
                 if not added_seed:
                     stack.append((x, y))
                     added_seed = True

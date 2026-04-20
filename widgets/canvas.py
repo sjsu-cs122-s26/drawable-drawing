@@ -11,7 +11,8 @@ from core.tools.base_tool import BaseTool
 class Canvas(QWidget):
     def __init__(self):
         super().__init__()
-        self.image = QImage()
+        self.setMinimumSize(1000,1000)
+        self.image = QImage(self.size(), QImage.Format.Format_ARGB32)
         self.color = QColor(Qt.GlobalColor.black)
         self.last_point = QPoint()
         self.drawing = False
@@ -21,7 +22,7 @@ class Canvas(QWidget):
         self.color = color
 
     def clear(self):
-        self.image.fill(Qt.GlobalColor.white)
+        self.image.fill("#00000000")
         self.update()
 
     def define_tools(self):
@@ -50,7 +51,7 @@ class Canvas(QWidget):
     @override
     def paintEvent(self, event):
         QPainter(self).drawImage(self.rect(), self.image, self.image.rect())
-    
+
     @override
     def showEvent(self, event):
         if self.image.isNull():
@@ -67,6 +68,7 @@ class Canvas(QWidget):
     
     @override
     def mouseMoveEvent(self, event):
+        print(event.position().toPoint())
         if self.drawing and (event.buttons() & Qt.MouseButton.LeftButton) and self.current_tool:
             self.current_tool.on_mouse_move(self, event)
 
@@ -75,5 +77,3 @@ class Canvas(QWidget):
         if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
             self.drawing = False
             self.current_tool.on_mouse_release(self, event)
-    
-    
