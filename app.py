@@ -9,7 +9,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout, 
     QToolBar,
     QHBoxLayout,
-    QScrollArea
+    QScrollArea,
+    QInputDialog
 )
 
 from widgets.color_wheel import ColorWheel
@@ -58,19 +59,26 @@ class Drawable(QMainWindow):
         menu_bar = self.menuBar()
         
         file_menu = menu_bar.addMenu("&File")
+        image_menu = menu_bar.addMenu("&Image")
         help_menu = menu_bar.addMenu("&Help")
         
         self.open_file_action = QAction("Open File")
         self.open_file_action.setShortcut("Ctrl+O")
-        self.open_file_action.setStatusTip("Open an image file")
+        self.open_file_action.setStatusTip("Open an image file.")
         self.open_file_action.triggered.connect(self.openFile)
         file_menu.addAction(self.open_file_action)
 
         self.save_file_action = QAction("Save File")
         self.save_file_action.setShortcut("Ctrl+S")
-        self.save_file_action.setStatusTip("Save currnet canvas as an image file")
+        self.save_file_action.setStatusTip("Save current canvas as an image file.")
         self.save_file_action.triggered.connect(self.saveFile)
         file_menu.addAction(self.save_file_action)
+
+        self.resize_canvas_action = QAction("Resize Canvas")
+        self.resize_canvas_action.setShortcut("Ctrl+Alt+C")
+        self.resize_canvas_action.setStatusTip("Resize canvas with width & height values.")
+        self.resize_canvas_action.triggered.connect(self.resizeCanvas)
+        image_menu.addAction(self.resize_canvas_action)
 
         
     def register_toolbar_widgets(self, toolbar: QToolBar):
@@ -99,3 +107,16 @@ class Drawable(QMainWindow):
         if not fileName:
             return
         self.canvas.save_image(fileName)
+
+    @Slot()
+    def resizeCanvas(self):
+        dialog = QInputDialog(self)
+        dialog.setIntRange(100, 8192)
+        dialog.setLabelText("Resize Canvas")
+        x, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input x value:", 1920, 100, 8192, 2,)
+        if not ok:
+            return
+        y, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input y value:", 1080, 100, 8912, 2)
+        if not ok:
+            return
+        self.canvas.resize(x, y)

@@ -5,8 +5,7 @@ from app import Drawable
 def main():
     app = QApplication([])
     widget = Drawable()
-    widget.resize(800, 500)
-    widget.show() 
+    widget.showMaximized()
     sys.exit(app.exec())
 
 if __name__ == "__main__":
