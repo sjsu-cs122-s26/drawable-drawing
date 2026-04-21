@@ -7,6 +7,7 @@ class LayerMenuStatic(QWidget):
     def __init__(self):
         super().__init__()
         self.setMaximumWidth(200)
+        self.setMaximumHeight(50)
         self.layer_blocks = []
         
 

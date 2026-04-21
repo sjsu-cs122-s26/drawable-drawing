@@ -8,6 +8,7 @@ from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
 
 class Layer(QWidget):
+    layer_updated = Signal()
     def __init__(self):
         super().__init__()
         self.setMinimumSize(100,100)
@@ -15,11 +16,17 @@ class Layer(QWidget):
         self.image = QImage(self.size(), QImage.Format.Format_ARGB32)
         self.image.fill(Qt.GlobalColor.transparent)
         self.opacity=1
+        self.hide()
 
     def clear(self):
         self.image.fill(Qt.GlobalColor.transparent)
         self.update()
+        self.layer_updated.emit()
     
+    def updateOpacity(self, opacity):
+        self.opacity = opacity
+        self.layer_updated.emit()
+
     @override
     def paintEvent(self, event):
         QPainter(self).drawImage(self.rect(), self.image, self.image.rect())

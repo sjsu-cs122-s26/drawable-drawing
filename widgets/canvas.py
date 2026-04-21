@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QPoint
 from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
 from widgets.layers import layer
+from widgets.layers.layer import Layer
 
 class Canvas(QWidget):
     def __init__(self):
@@ -27,18 +28,19 @@ class Canvas(QWidget):
     def setColor(self, color):
         self.color = color
 
-    def addLayer(self, layer):
+    def addLayer(self, layer : Layer):
         self.layers.append(layer)
-        self.currentLayerIndex = len(self.layers)
-        self.currentLayer = self.layers[self.currentLayerIndex-1]
+        self.currentLayerIndex = len(self.layers)-1
+        self.currentLayer = self.layers[self.currentLayerIndex]
+        layer.layer_updated.connect(lambda : self.update())
         
     def deleteLayer(self, layer):
         self.layers.remove(layer)
         if self.currentLayer == layer:
-            self.currentLayerIndex = 0
-            self.currentLayer=self.layers[self.currentLayerIndex-1]
+            self.currentLayerIndex = len(self.layers)-1
+            self.currentLayer=self.layers[self.currentLayerIndex]
     
-    def switchLayer(self, layer):
+    def switchActiveLayer(self, layer):
         self.currentLayer = layer
         self.currentLayerIndex = self.layers.index(layer)
 
