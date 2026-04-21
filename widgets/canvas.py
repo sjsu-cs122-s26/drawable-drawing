@@ -40,7 +40,7 @@ class Canvas(QWidget):
     
     def switchLayer(self, layer):
         self.currentLayer = layer
-        self.currentLayerIndex = self.layers.get(layer)
+        self.currentLayerIndex = self.layers.index(layer)
 
     def clear(self):
         self.currentLayer.image.fill(Qt.GlobalColor.transparent)
@@ -67,7 +67,7 @@ class Canvas(QWidget):
     def saveImage(self, path):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         image = QImage(self.size(), QImage.Format.Format_ARGB32_Premultiplied)
-        self.compositeImage(image, QPainter.CompositionMode_DestinationOver)
+        self.compositeImage(image, QPainter.CompositionMode_SourceOver)
         self.render(image, renderFlags=QWidget.RenderFlag.DrawChildren)
         image.save(path, "PNG")
         self.setAttribute(Qt.WA_TranslucentBackground, False)
