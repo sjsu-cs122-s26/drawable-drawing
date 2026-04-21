@@ -9,14 +9,14 @@ class Clear(QWidget):
 
         self.clear_button = QPushButton("Clear")
         self.clear_button.setFixedSize(150, 30)
-        self.clear_button.clicked.connect(self.confirm_clear)
+        self.clear_button.clicked.connect(self.confirmClear)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(1, 1, 1, 1)
         layout.addWidget(self.clear_button)
 
 
-    def confirm_clear(self):
+    def confirmClear(self):
         reply = QMessageBox.question(
             self,
             "Clear Canvas",

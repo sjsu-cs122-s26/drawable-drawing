@@ -1,5 +1,5 @@
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QPixmap, QAction, QIcon, QActionGroup
+from PySide6.QtCore import Slot, Qt
+from PySide6.QtGui import QPixmap, QAction, QIcon, QActionGroup, QPalette, QColor
 from PySide6.QtWidgets import (
     QMainWindow, 
     QWidget, 
@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
 from widgets.clear import Clear
+from widgets.layers.layer_menu import LayerMenu
 
 class Drawable(QMainWindow):
     def __init__(self):
@@ -23,23 +24,34 @@ class Drawable(QMainWindow):
         self.setWindowTitle("Drawable")
         icon = QIcon("media/drawable_icon.jpg")
         self.setWindowIcon(icon)
-
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
-        self.create_menus()
+        self.createMenus()
 
         self.canvas = Canvas()
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.canvas)
-        self.main_layout.addWidget(self.scrollArea)
+        self.scrollArea.setBackgroundRole(QPalette.Dark)
+
+        self.layer_menu = LayerMenu()
+        self.layer_menu.delete_layer_validated.connect(self.canvas.deleteLayer)
+        self.layer_menu.add_layer.connect(self.canvas.addLayer)
+        self.layer_menu.update_opacity_validated.connect(self.canvas.update)
+        self.layer_menu.switch_layer.connect(self.canvas.switchLayer)
+        self.layer_menu.addLayer()
+
+        self.central_layout = QHBoxLayout()
+        self.central_layout.addWidget(self.layer_menu)
+        self.central_layout.addWidget(self.scrollArea)
+        self.main_layout.addLayout(self.central_layout)
         
         toolbar = QToolBar("Toolbar")
         self.register_toolbar_widgets(toolbar)
         self.addToolBar(toolbar)
 
         self.color_wheel = ColorWheel()
-        self.color_wheel.color_change.connect(self.canvas.set_color)
+        self.color_wheel.color_change.connect(self.canvas.setColor)
         self.main_layout.addWidget(self.color_wheel)
 
         self.clear = Clear()
@@ -54,8 +66,7 @@ class Drawable(QMainWindow):
         bottom_layout.addStretch()
         self.main_layout.addLayout(bottom_layout)
 
-
-    def create_menus(self):
+    def createMenus(self):
         menu_bar = self.menuBar()
         
         file_menu = menu_bar.addMenu("&File")
@@ -87,7 +98,7 @@ class Drawable(QMainWindow):
         for tool_name in self.canvas.tools.keys():
             action = toolbar.addAction(tool_name.capitalize())
             action.setCheckable(True)
-            action.triggered.connect(lambda checked, name=tool_name: self.canvas.set_active_tool(name))
+            action.triggered.connect(lambda checked, name=tool_name: self.canvas.setActiveTool(name))
             self.group.addAction(action)
 
 
@@ -98,7 +109,7 @@ class Drawable(QMainWindow):
         if not dialog.exec():
             return
         fileName = dialog.selectedFiles()[0]
-        self.canvas.load_image(fileName)
+        self.canvas.loadImage(fileName)
     
     @Slot()
     def saveFile(self):
@@ -106,7 +117,7 @@ class Drawable(QMainWindow):
         fileName = dialog.getSaveFileName(filter=("Images (*.png)"))[0]
         if not fileName:
             return
-        self.canvas.save_image(fileName)
+        self.canvas.saveImage(fileName)
 
     @Slot()
     def resizeCanvas(self):

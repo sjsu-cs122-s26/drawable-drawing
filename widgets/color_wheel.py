@@ -1,7 +1,6 @@
-from PySide6.QtWidgets import QWidget, QPushButton
+from PySide6.QtWidgets import QWidget, QPushButton, QColorDialog, QVBoxLayout
 from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QColorDialog, QVBoxLayout
 
 class ColorWheel(QWidget):
     color_change = Signal(QColor)

@@ -8,31 +8,31 @@ class BucketTool(BaseTool):
         start_point = event.position().toPoint()
         x, y = start_point.x(), start_point.y()
         
-        if not canvas.image.rect().contains(start_point):
+        if not canvas.currentLayer.image.rect().contains(start_point):
             return
 
-        target_color = canvas.image.pixelColor(x, y)
-        fill_color = canvas.color.rgba()
+        target_color = canvas.currentLayer.image.pixelColor(x, y)
+        fill_color = canvas.color
 
         if target_color == fill_color:
             return
 
-        width = canvas.image.width()
-        height = canvas.image.height()
+        width = canvas.currentLayer.image.width()
+        height = canvas.currentLayer.image.height()
         
         stack = [(x, y)]
         while stack:
             curr_x, curr_y = stack.pop()
 
             lx = curr_x
-            while lx >= 0 and canvas.image.pixelColor(lx, curr_y) == target_color:
-                canvas.image.setPixelColor(lx, curr_y, fill_color)
+            while lx >= 0 and canvas.currentLayer.image.pixelColor(lx, curr_y) == target_color:
+                canvas.currentLayer.image.setPixelColor(lx, curr_y, fill_color)
                 lx -= 1
             lx += 1
 
             rx = curr_x + 1
-            while rx < width and canvas.image.pixelColor(rx, curr_y) == target_color:
-                canvas.image.setPixelColor(rx, curr_y, fill_color)
+            while rx < width and canvas.currentLayer.image.pixelColor(rx, curr_y) == target_color:
+                canvas.currentLayer.image.setPixelColor(rx, curr_y, fill_color)
                 rx += 1
             rx -= 1
 
@@ -46,7 +46,7 @@ class BucketTool(BaseTool):
     def _scan_line(self, lx, rx, y, stack, canvas, target_color):
         added_seed = False
         for x in range(lx, rx + 1):
-            if canvas.image.pixelColor(x, y) == target_color:
+            if canvas.currentLayer.image.pixelColor(x, y) == target_color:
                 if not added_seed:
                     stack.append((x, y))
                     added_seed = True

@@ -11,7 +11,7 @@ class PenTool(BaseTool):
     
     @override
     def on_mouse_move(self, canvas, event):
-        painter = QPainter(canvas.image)
+        painter = QPainter(canvas.currentLayer.image)
         painter.setPen(QPen(canvas.color, self.pen_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.drawLine(canvas.last_point, event.position().toPoint())
         canvas.last_point = event.position().toPoint()
