@@ -8,6 +8,7 @@ from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
 from widgets.layers import layer
 from widgets.layers.layer import Layer
+from core.tools.shapes_tool import ShapesTool
 
 class Canvas(QWidget):
     def __init__(self):
@@ -63,9 +64,11 @@ class Canvas(QWidget):
         self.update()
 
     def defineTools(self):
+        self.shapes_tool = ShapesTool()
         self.tools = {
             "pen": PenTool(),
-            "bucket": BucketTool()
+            "bucket": BucketTool(),
+            "shapes": self.shapes_tool
         }
         self.current_tool = None
 
@@ -101,6 +104,7 @@ class Canvas(QWidget):
         painter.setOpacity(0)
         painter.end
         self.compositing = False
+
 
     @override
     def paintEvent(self, event):

@@ -10,7 +10,8 @@ from PySide6.QtWidgets import (
     QToolBar,
     QHBoxLayout,
     QScrollArea,
-    QInputDialog
+    QInputDialog,
+    QComboBox
 )
 
 from widgets.color_wheel import ColorWheel
@@ -62,13 +63,25 @@ class Drawable(QMainWindow):
         self.clear.cleared.connect(self.canvas.clear)
         self.main_layout.addWidget(self.clear)
 
+        self.shape_combo = QComboBox()
+        self.shape_combo.addItems(["Rectangle", "Ellipse", "Triangle", "Line"])
+        self.shape_combo.setFixedSize(150, 30)
+        self.shape_combo.setVisible(False)
+        self.shape_combo.currentTextChanged.connect(lambda name: self.canvas.shapes_tool.setShape(name))
+
         bottom_layout = QHBoxLayout()
         bottom_layout.setContentsMargins(0, 0, 0, 0)
         bottom_layout.setSpacing(0)
         bottom_layout.addWidget(self.color_wheel)
         bottom_layout.addWidget(self.clear)
         bottom_layout.addStretch()
+        bottom_layout.addWidget(self.shape_combo)
         self.main_layout.addLayout(bottom_layout)
+
+        
+
+        
+
 
     def createMenus(self):
         menu_bar = self.menuBar()
@@ -110,6 +123,13 @@ class Drawable(QMainWindow):
             action = toolbar.addAction(tool_name.capitalize())
             action.setCheckable(True)
             action.triggered.connect(lambda checked, name=tool_name: self.canvas.setActiveTool(name))
+            if tool_name == "shapes":
+                action.triggered.connect(lambda checked: self.shape_combo.setVisible(
+                self.canvas.current_tool is not None and self.canvas.current_tool == self.canvas.shapes_tool
+                ))
+            else:
+                action.triggered.connect(lambda checked: self.shape_combo.setVisible(False))
+                self.group.addAction(action)
             self.group.addAction(action)
 
 
