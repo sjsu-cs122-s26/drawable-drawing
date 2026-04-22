@@ -38,6 +38,7 @@ class Drawable(QMainWindow):
         self.layer_menu.delete_layer_validated.connect(self.canvas.deleteLayer)
         self.layer_menu.add_layer.connect(self.canvas.addLayer)
         self.layer_menu.switch_layer.connect(self.canvas.switchActiveLayer)
+        self.layer_menu.swap_layer.connect(self.canvas.swapLayerOrder)
         self.layer_menu.addLayer()
         self.scrollAreaLayoutMenu = QScrollArea()
         self.scrollAreaLayoutMenu.setMaximumWidth(250)
@@ -73,6 +74,7 @@ class Drawable(QMainWindow):
         menu_bar = self.menuBar()
         
         file_menu = menu_bar.addMenu("&File")
+        edit_menu = menu_bar.addMenu("&Edit")
         image_menu = menu_bar.addMenu("&Image")
         help_menu = menu_bar.addMenu("&Help")
         
@@ -87,6 +89,12 @@ class Drawable(QMainWindow):
         self.save_file_action.setStatusTip("Save current canvas as an image file.")
         self.save_file_action.triggered.connect(self.saveFile)
         file_menu.addAction(self.save_file_action)
+
+        self.modify_bucket_action = QAction("Modify Bucket Tolerance")
+        self.modify_bucket_action.setShortcut("Ctrl+Alt+B")
+        self.modify_bucket_action.setStatusTip("Modify how similar pixels must be to be affected by the paint bucket tool.")
+        self.modify_bucket_action.triggered.connect(self.modifyBucket)
+        edit_menu.addAction(self.modify_bucket_action)
 
         self.resize_canvas_action = QAction("Resize Canvas")
         self.resize_canvas_action.setShortcut("Ctrl+Alt+C")
@@ -134,3 +142,13 @@ class Drawable(QMainWindow):
         if not ok:
             return
         self.canvas.resize(x, y)
+
+    @Slot()
+    def modifyBucket(self):
+        dialog = QInputDialog(self)
+        dialog.setIntRange(0, 255)
+        dialog.setLabelText("Modify Bucket Tolerance")
+        tolerance, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input integer:", 0, 0, 255, 2,)
+        if not ok:
+            return
+        self.canvas.bucket_tolerance = tolerance

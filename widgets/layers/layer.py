@@ -21,6 +21,7 @@ class Layer(QWidget):
     def clear(self):
         self.image.fill(Qt.GlobalColor.transparent)
         self.update()
+        print("cleared")
         self.layer_updated.emit()
     
     def updateOpacity(self, opacity):
@@ -30,6 +31,7 @@ class Layer(QWidget):
     @override
     def paintEvent(self, event):
         QPainter(self).drawImage(self.rect(), self.image, self.image.rect())
+        self.layer_updated.emit()
 
     @override
     def showEvent(self, event):

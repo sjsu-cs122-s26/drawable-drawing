@@ -24,6 +24,8 @@ class Canvas(QWidget):
         self.defineTools()
         self.layers = []
         self.currentLayerIndex = -1
+
+        self.bucket_tolerance = 0
         
     def setColor(self, color):
         self.color = color
@@ -39,13 +41,25 @@ class Canvas(QWidget):
         if self.currentLayer == layer:
             self.currentLayerIndex = len(self.layers)-1
             self.currentLayer=self.layers[self.currentLayerIndex]
+        self.update()
     
     def switchActiveLayer(self, layer):
         self.currentLayer = layer
         self.currentLayerIndex = self.layers.index(layer)
+    
+    def swapLayerOrder(self, index1, index2):
+        layerHolder = self.layers[index1]
+        self.layers[index1]=self.layers[index2]
+        self.layers[index2]=layerHolder
+        if index1 == self.currentLayerIndex:
+            self.currentLayerIndex=index2
+        elif index2 == self.currentLayerIndex:
+            self.currentLayerIndex=index1
+        self.update()
 
     def clear(self):
-        self.currentLayer.image.fill(Qt.GlobalColor.transparent)
+        for layer in self.layers:
+            layer.clear()
         self.update()
 
     def defineTools(self):
