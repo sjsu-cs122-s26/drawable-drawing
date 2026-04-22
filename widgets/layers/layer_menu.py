@@ -28,7 +28,6 @@ class LayerMenu(QWidget):
         self.group.setExclusive(True)
 
     def addLayer(self):
-        print("1")
         self.lifetime_layers+=1
         newLayer = Layer()
         newLayerBlock = LayerBlock("Layer_" + str(self.lifetime_layers), newLayer)
@@ -37,8 +36,7 @@ class LayerMenu(QWidget):
         newLayerBlock.delete_layer.connect(self.deleteLayer)
         self.group.addButton(newLayerBlock)
         newLayerBlock.clicked.connect(self.switchActiveLayer)
-        newLayerBlock.update_block.connect(lambda x: self.update)
-        print("2")
+        newLayerBlock.update_block.connect(self.update)
         newLayerBlock.move.connect(self.moveLayerBlock)
         
         self.layout.addWidget(newLayerBlock)
@@ -56,19 +54,24 @@ class LayerMenu(QWidget):
             message.setText("The layer could not be deleted because there must always be at least one layer.")
             message.exec()
             return
+        self.delete_layer_validated.emit(Layer)
         toDelete = self.sender()
+        self.deleteLayerMain(toDelete)
+        self.deleteLayerCleanup(toDelete)
+        
+        toDelete.hide()
+    def deleteLayerMain(self, toDelete):
         self.layer_blocks.remove(toDelete)
         if toDelete.isChecked():
             self.layer_blocks[len(self.layer_blocks)-1].setChecked(True)
         self.layout.removeWidget(toDelete)
         self.group.removeButton(toDelete)
-        self.delete_layer_validated.emit(Layer)
 
+    def deleteLayerCleanup(self, toDelete):
         baseY = self.height()-toDelete.height()
         contentMargins = toDelete.contentsMargins().bottom()+toDelete.contentsMargins().top()
         spacing=22
         self.setFixedHeight(baseY-contentMargins-spacing)
-        self.sender().hide()
     
     def switchActiveLayer(self):
         self.switch_layer.emit(self.sender().layer)
@@ -77,18 +80,28 @@ class LayerMenu(QWidget):
         sender = self.sender()
         senderDex = self.layer_blocks.index(sender)
         swapDex = senderDex+int
+        
+        if not self.checkMoveValidity(swapDex):
+            return
+        self.moveLayerBlockMenu(senderDex, swapDex, sender)
 
+        self.update()
+        self.swap_layer.emit(senderDex, swapDex)
+    
+    def checkMoveValidity(self, swapDex):
         if swapDex<0: #swap location is invalid
             message = QMessageBox(self)
             message.setText("The layer could not be moved up because the layer is already at the top.")
             message.exec()
-            return
+            return False
         if swapDex>len(self.layer_blocks)-1: #swap location is invalid
             message = QMessageBox(self)
             message.setText("The layer could not be moved down because the layer is already at the bottom.")
             message.exec()
-            return
-
+            return False
+        return True
+    
+    def moveLayerBlockMenu(self, senderDex, swapDex, sender):
         blockSender = self.layer_blocks[senderDex]
         blockSwap = self.layer_blocks[swapDex]
         self.layer_blocks[senderDex]=self.layer_blocks[swapDex]
@@ -101,5 +114,3 @@ class LayerMenu(QWidget):
         else:
             self.layout.insertWidget(swapDex+1, blockSender)
             self.layout.insertWidget(senderDex+1, blockSwap)
-        self.update()
-        self.swap_layer.emit(senderDex, swapDex)

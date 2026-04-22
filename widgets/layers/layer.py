@@ -16,7 +16,6 @@ class Layer(QWidget):
         self.image = QImage(self.size(), QImage.Format.Format_ARGB32)
         self.image.fill(Qt.GlobalColor.transparent)
         self.opacity=1
-        self.hide()
 
     def clear(self):
         self.image.fill(Qt.GlobalColor.transparent)

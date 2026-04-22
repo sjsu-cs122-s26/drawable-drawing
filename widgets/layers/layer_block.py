@@ -15,13 +15,27 @@ class LayerBlock(QPushButton):
     def __init__(self, layerName, layer):
         super().__init__()
         self.setFixedSize(229, 125)
+        self.layerName = layerName
+        self.layer = layer
+
+        topLayout = self.createTopLayout(layerName, layer)
+        middleLayout = self.createMiddleLayout()
+        bottomLayout = self.createBottomLayout()
+
+        layout = QVBoxLayout(self)
+        layout.addLayout(topLayout)
+        layout.addLayout(middleLayout)
+        layout.addLayout(bottomLayout)
+    
+    def createTopLayout(self, layerName, layer):
+        
         layerDisplayName = QLabel()
         layerDisplayName.setText(layerName)
         self.image = MiniImage()
         self.image.setMaximumSize(128, 72)
         self.image_opacity=1
         self.pixmap = self.image.pixmap()
-        self.image.setPixmap(QPixmap("media/drawable_icon.jpg")) # temp image file. Will fix the issue of images not rendering later.
+        self.image.setPixmap(QPixmap("media/drawable_icon.jpg"))
 
         self.move_up_button = QPushButton("Up")
         self.move_up_button.setMaximumSize(75, 25)
@@ -29,22 +43,36 @@ class LayerBlock(QPushButton):
         self.move_down_button = QPushButton("Down")
         self.move_down_button.setMaximumSize(75, 25)
         self.move_down_button.clicked.connect(lambda x: self.move.emit(1))
-
+        
+        topLayout = QHBoxLayout()
+        topRightLayout = QVBoxLayout()
+        topRightLayout.addWidget(self.move_up_button)
+        topRightLayout.addWidget(self.move_down_button)
+        topLayout.addWidget(layerDisplayName)
+        topLayout.addWidget(self.image)
+        topLayout.addLayout(topRightLayout)
+        return topLayout
+    
+    def createMiddleLayout(self):
         self.clear_layer_button = QPushButton("Clear layer")
         self.clear_layer_button.setMaximumSize(100, 25)
         self.clear_layer_button.clicked.connect(self.confirmClear)
         self.delete_layer_button = QPushButton("Delete layer")
         self.delete_layer_button.setMaximumSize(100, 25)
         self.delete_layer_button.clicked.connect(self.confirmDelete)
-        self.layerName = layerName
         self.setCheckable(True)
         self.setStyleSheet('''
             QPushButton:checked {
             background-color: #144288;
             }
             ''')
-        self.layer = layer
-
+        
+        middleLayout = QHBoxLayout()
+        middleLayout.addWidget(self.clear_layer_button)
+        middleLayout.addWidget(self.delete_layer_button)
+        return middleLayout
+    
+    def createBottomLayout(self):
         opacityText = QLabel()
         opacityText.setText("Opacity")
         self.opacity_slider = QSlider(Qt.Horizontal)
@@ -55,24 +83,11 @@ class LayerBlock(QPushButton):
         self.opacity_slider.setSliderPosition(100)
         self.opacity_slider.valueChanged.connect(self.valueChanged)
 
-        layout = QVBoxLayout(self)
-        topLayout = QHBoxLayout()
-        topLeftLayout = QVBoxLayout()
-        middleLayout = QHBoxLayout()
         bottomLayout = QHBoxLayout()
-        topLayout.addWidget(layerDisplayName)
-        topLayout.addWidget(self.image)
-        topLeftLayout.addWidget(self.move_up_button)
-        topLeftLayout.addWidget(self.move_down_button)
-        topLayout.addLayout(topLeftLayout)
-        middleLayout.addWidget(self.clear_layer_button)
-        middleLayout.addWidget(self.delete_layer_button)
         bottomLayout.addWidget(opacityText)
         bottomLayout.addWidget(self.opacity_slider)
-        layout.addLayout(topLayout)
-        layout.addLayout(middleLayout)
-        layout.addLayout(bottomLayout)
-    
+        return bottomLayout
+
     def confirmDelete(self):
         reply = QMessageBox.question(
             self,
@@ -97,14 +112,7 @@ class LayerBlock(QPushButton):
         self.layer.updateOpacity(self.image_opacity)
         self.updateLayer()
     
-    def setLayer(self, layer: Layer):
-        if hasattr(self, "layer"):
-            self.layer.layer_updated.disconnect(self.updateLayer)
-        self.layer = layer
-        self.layer.layer_updated.connect(self.updateLayer)
-        self.layer.updateOpacity(self.image_opacity)
-    
     def updateLayer(self):
         self.image.setPixmap(QPixmap(self.layer.image))
-        self.update()
+        self.image.update()
         self.update_block.emit()

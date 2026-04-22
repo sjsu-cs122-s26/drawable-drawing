@@ -22,14 +22,75 @@ from widgets.layers.layer_menu import LayerMenu
 class Drawable(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Drawable")
-        icon = QIcon("media/drawable_icon.jpg")
-        self.setWindowIcon(icon)
+        self.setWindowParameters()
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
-        self.createMenus()
 
+        self.createMenus()
+        self.createCentralLayout()
+        self.createBottomLayout()
+
+        toolbar = QToolBar("Toolbar")
+        self.register_toolbar_widgets(toolbar)
+        self.addToolBar(toolbar)
+
+    def setWindowParameters(self):
+        self.setWindowTitle("Drawable")
+        icon = QIcon("media/drawable_icon.jpg")
+        self.setWindowIcon(icon)
+
+    def createMenus(self):
+        menu_bar = self.menuBar()
+
+        self.createFileMenu(menu_bar)
+        self.createEditMenu(menu_bar)
+        self.createImageMenu(menu_bar)
+        self.createHelpMenu(menu_bar)
+
+    def createFileMenu(self, menu_bar):
+        file_menu = menu_bar.addMenu("&File")
+        self.open_file_action = QAction("Open File")
+        self.open_file_action.setShortcut("Ctrl+O")
+        self.open_file_action.setStatusTip("Open an image file.")
+        self.open_file_action.triggered.connect(self.openFile)
+        file_menu.addAction(self.open_file_action)
+
+        self.save_file_action = QAction("Save File")
+        self.save_file_action.setShortcut("Ctrl+S")
+        self.save_file_action.setStatusTip("Save current canvas as an image file.")
+        self.save_file_action.triggered.connect(self.saveFile)
+        file_menu.addAction(self.save_file_action)
+
+    def createEditMenu(self, menu_bar):
+        edit_menu = menu_bar.addMenu("&Edit")
+        self.modify_bucket_action = QAction("Modify Bucket Tolerance")
+        self.modify_bucket_action.setShortcut("Ctrl+Alt+B")
+        self.modify_bucket_action.setStatusTip("Modify how similar pixels must be to be affected by the paint bucket tool.")
+        self.modify_bucket_action.triggered.connect(self.modifyBucket)
+        edit_menu.addAction(self.modify_bucket_action)
+
+    def createImageMenu(self, menu_bar):
+        image_menu = menu_bar.addMenu("&Image")
+        self.resize_canvas_action = QAction("Resize Canvas")
+        self.resize_canvas_action.setShortcut("Ctrl+Alt+C")
+        self.resize_canvas_action.setStatusTip("Resize canvas with width & height values.")
+        self.resize_canvas_action.triggered.connect(self.resizeCanvas)
+        image_menu.addAction(self.resize_canvas_action)
+
+    def createHelpMenu(self, menu_bar):
+        help_menu = menu_bar.addMenu("&Help")
+        
+    def register_toolbar_widgets(self, toolbar: QToolBar):
+        self.group = QActionGroup(self)
+        self.group.setExclusionPolicy(QActionGroup.ExclusionPolicy.ExclusiveOptional)
+        for tool_name in self.canvas.tools.keys():
+            action = toolbar.addAction(tool_name.capitalize())
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, name=tool_name: self.canvas.setActiveTool(name))
+            self.group.addAction(action)
+
+    def createCentralLayout(self):
         self.canvas = Canvas()
         self.scrollAreaCanvas = QScrollArea()
         self.scrollAreaCanvas.setWidget(self.canvas)
@@ -50,11 +111,8 @@ class Drawable(QMainWindow):
         self.central_layout.addWidget(self.scrollAreaLayoutMenu)
         self.central_layout.addWidget(self.scrollAreaCanvas)
         self.main_layout.addLayout(self.central_layout)
-        
-        toolbar = QToolBar("Toolbar")
-        self.register_toolbar_widgets(toolbar)
-        self.addToolBar(toolbar)
 
+    def createBottomLayout(self):
         self.color_wheel = ColorWheel()
         self.color_wheel.color_change.connect(self.canvas.setColor)
         self.main_layout.addWidget(self.color_wheel)
@@ -77,11 +135,6 @@ class Drawable(QMainWindow):
         bottom_layout.addStretch()
         bottom_layout.addWidget(self.shape_combo)
         self.main_layout.addLayout(bottom_layout)
-
-        
-
-        
-
 
     def createMenus(self):
         menu_bar = self.menuBar()
@@ -131,7 +184,6 @@ class Drawable(QMainWindow):
                 action.triggered.connect(lambda checked: self.shape_combo.setVisible(False))
                 self.group.addAction(action)
             self.group.addAction(action)
-
 
     @Slot()
     def openFile(self):
