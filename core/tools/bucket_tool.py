@@ -15,7 +15,7 @@ class BucketTool(BaseTool):
         self.target_color = canvas.currentLayer.image.pixelColor(x, y)
         self.fill_color = canvas.color
         self.tolerance = canvas.bucket_tolerance
-        if self.checkDistance( self.fill_color):
+        if self.fill_color==self.target_color:
             return
 
         width = canvas.currentLayer.image.width()
