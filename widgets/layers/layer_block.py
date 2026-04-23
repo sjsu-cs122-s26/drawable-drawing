@@ -1,8 +1,8 @@
 from typing import override
 
 from PySide6.QtWidgets import QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QSlider, QLabel
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtCore import Signal, Qt, QSize
+from PySide6.QtGui import QPixmap, QPainter, QPalette, QImage
+from PySide6.QtCore import Signal, Qt, QBuffer, QIODevice
 
 from widgets.layers.layer import Layer
 from widgets.layers.layer_mini_image import MiniImage
@@ -12,11 +12,12 @@ class LayerBlock(QPushButton):
     update_block = Signal()
     move = Signal(int)
 
-    def __init__(self, layerName, layer):
+    def __init__(self, layerName: str, layer: Layer):
         super().__init__()
         self.setFixedSize(229, 125)
         self.layerName = layerName
         self.layer = layer
+        self.layer.layer_updated.connect(self.updateLayer)
 
         topLayout = self.createTopLayout(layerName, layer)
         middleLayout = self.createMiddleLayout()
@@ -26,9 +27,7 @@ class LayerBlock(QPushButton):
         layout.addLayout(topLayout)
         layout.addLayout(middleLayout)
         layout.addLayout(bottomLayout)
-    
     def createTopLayout(self, layerName, layer):
-        
         layerDisplayName = QLabel()
         layerDisplayName.setText(layerName)
         self.image = MiniImage()
@@ -56,10 +55,10 @@ class LayerBlock(QPushButton):
     def createMiddleLayout(self):
         self.clear_layer_button = QPushButton("Clear layer")
         self.clear_layer_button.setMaximumSize(100, 25)
-        self.clear_layer_button.clicked.connect(self.confirmClear)
+        self.clear_layer_button.clicked.connect(lambda: self.confirmAction("clear", self.layer.clear, None))
         self.delete_layer_button = QPushButton("Delete layer")
         self.delete_layer_button.setMaximumSize(100, 25)
-        self.delete_layer_button.clicked.connect(self.confirmDelete)
+        self.delete_layer_button.clicked.connect(lambda: self.confirmAction("delete", self.delete_layer.emit, self.layer))
         self.setCheckable(True)
         self.setStyleSheet('''
             QPushButton:checked {
@@ -87,26 +86,20 @@ class LayerBlock(QPushButton):
         bottomLayout.addWidget(opacityText)
         bottomLayout.addWidget(self.opacity_slider)
         return bottomLayout
-
-    def confirmDelete(self):
-        reply = QMessageBox.question(
-            self,
-            "Delete layer",
-            "Are you sure you want to delete " + self.layerName + "?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if reply == QMessageBox.StandardButton.Yes:
-            self.delete_layer.emit(self.layer)
     
-    def confirmClear(self):
+    def confirmAction(self, actionName: str, actionTrue, actionTrueParameter):
         reply = QMessageBox.question(
             self,
-            "Clear layer",
-            "Are you sure you want to clear " + self.layerName + "?",
+            actionName.capitalize()+ " layer",
+            "Are you sure you want to " + actionName.lower() + " " + self.layerName + "?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:
-            self.layer.clear()
+            if actionTrueParameter:
+                actionTrue(actionTrueParameter)
+                return
+            actionTrue()
+
     def valueChanged(self, position):
         self.image_opacity = min(max(float(position)/100, 0), 1)
         self.layer.updateOpacity(self.image_opacity)
@@ -114,6 +107,10 @@ class LayerBlock(QPushButton):
     
     def updateLayer(self):
         self.image.setPixmap(QPixmap(self.layer.image))
-        self.image.update()
         self.update()
         self.update_block.emit()
+    
+    @override
+    def paintEvent(self, event):
+        self.updateLayer()
+        super().paintEvent(event)

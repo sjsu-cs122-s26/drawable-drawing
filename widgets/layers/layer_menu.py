@@ -31,18 +31,21 @@ class LayerMenu(QWidget):
         self.lifetime_layers+=1
         newLayer = Layer()
         newLayerBlock = LayerBlock("Layer_" + str(self.lifetime_layers), newLayer)
-
+        self.addLayerMain(newLayerBlock)
+        self.addLayerCleanup(newLayerBlock)
+        self.add_layer.emit(newLayer)
+    
+    def addLayerMain(self, newLayerBlock):
         self.layer_blocks.append(newLayerBlock)
         newLayerBlock.delete_layer.connect(self.deleteLayer)
         self.group.addButton(newLayerBlock)
         newLayerBlock.clicked.connect(self.switchActiveLayer)
         newLayerBlock.update_block.connect(self.update)
         newLayerBlock.move.connect(self.moveLayerBlock)
-        
         self.layout.addWidget(newLayerBlock)
-        self.add_layer.emit(newLayer)
         newLayerBlock.setChecked(True)
-        
+
+    def addLayerCleanup(self, newLayerBlock):
         baseY = self.height()+newLayerBlock.height()
         contentMargins = newLayerBlock.contentsMargins().bottom()+newLayerBlock.contentsMargins().top()
         spacing=22
@@ -59,7 +62,6 @@ class LayerMenu(QWidget):
         self.deleteLayerMain(toDelete)
         self.deleteLayerCleanup(toDelete)
         
-        toDelete.hide()
     def deleteLayerMain(self, toDelete):
         self.layer_blocks.remove(toDelete)
         if toDelete.isChecked():
