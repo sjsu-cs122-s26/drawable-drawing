@@ -109,6 +109,8 @@ class Canvas(QWidget):
     @override
     def paintEvent(self, event):
         self.compositeImage(self, QPainter.CompositionMode_SourceOver)
+        if self.drawing and self.current_tool == self.shapes_tool:
+            self.current_tool.draw_preview(self)
 
     @override
     def resizeEvent(self, event):
