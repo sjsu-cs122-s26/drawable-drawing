@@ -80,15 +80,6 @@ class Drawable(QMainWindow):
 
     def createHelpMenu(self, menu_bar):
         help_menu = menu_bar.addMenu("&Help")
-        
-    def register_toolbar_widgets(self, toolbar: QToolBar):
-        self.group = QActionGroup(self)
-        self.group.setExclusionPolicy(QActionGroup.ExclusionPolicy.ExclusiveOptional)
-        for tool_name in self.canvas.tools.keys():
-            action = toolbar.addAction(tool_name.capitalize())
-            action.setCheckable(True)
-            action.triggered.connect(lambda checked, name=tool_name: self.canvas.setActiveTool(name))
-            self.group.addAction(action)
 
     def createCentralLayout(self):
         self.canvas = Canvas()
