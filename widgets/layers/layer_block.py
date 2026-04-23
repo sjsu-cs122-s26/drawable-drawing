@@ -31,7 +31,7 @@ class LayerBlock(QPushButton):
         layerDisplayName = QLabel()
         layerDisplayName.setText(layerName)
         self.image = MiniImage()
-        self.image.setMaximumSize(128, 72)
+        self.image.setMaximumSize(128, 128)
         self.image_opacity=1
         self.pixmap = self.image.pixmap()
 

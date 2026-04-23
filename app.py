@@ -174,10 +174,10 @@ class Drawable(QMainWindow):
         dialog = QInputDialog(self)
         dialog.setIntRange(100, 8192)
         dialog.setLabelText("Resize Canvas")
-        x, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input x value:", 1920, 100, 8192, 2,)
+        x, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input x value:", self.canvas.width(), 100, 8192, 2,)
         if not ok:
             return
-        y, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input y value:", 1080, 100, 8912, 2)
+        y, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input y value:", self.canvas.height(), 100, 8912, 2)
         if not ok:
             return
         self.canvas.resize(x, y)

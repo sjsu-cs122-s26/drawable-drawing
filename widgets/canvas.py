@@ -32,6 +32,8 @@ class Canvas(QWidget):
         self.color = color
 
     def addLayer(self, layer : Layer):
+        layer.image = QImage(self.size(), QImage.Format.Format_ARGB32)
+        layer.image.fill(Qt.GlobalColor.transparent)
         self.layers.append(layer)
         self.currentLayerIndex = len(self.layers)-1
         self.currentLayer = self.layers[self.currentLayerIndex]

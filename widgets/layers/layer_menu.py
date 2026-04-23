@@ -12,7 +12,7 @@ class LayerMenu(QWidget):
     add_layer = Signal(Layer)
     switch_layer = Signal(Layer)
     swap_layer = Signal(int, int)
-
+    
     def __init__(self):
         super().__init__()
         self.lifetime_layers = 0
@@ -70,6 +70,7 @@ class LayerMenu(QWidget):
         self.group.removeButton(toDelete)
 
     def deleteLayerCleanup(self, toDelete):
+        toDelete.hide()
         baseY = self.height()-toDelete.height()
         contentMargins = toDelete.contentsMargins().bottom()+toDelete.contentsMargins().top()
         spacing=22

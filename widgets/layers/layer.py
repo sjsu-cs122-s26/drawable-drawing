@@ -12,7 +12,7 @@ class Layer(QWidget):
     def __init__(self):
         super().__init__()
         self.setMinimumSize(100,100)
-        self.resize(1920,1080)
+        self.setMaximumSize(8192, 8192)
         self.image = QImage(self.size(), QImage.Format.Format_ARGB32)
         self.image.fill(Qt.GlobalColor.transparent)
         self.opacity=1
