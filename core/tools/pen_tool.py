@@ -14,5 +14,6 @@ class PenTool(BaseTool):
         painter = QPainter(canvas.currentLayer.image)
         painter.setPen(QPen(canvas.color, self.pen_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.drawLine(canvas.last_point, event.position().toPoint())
+        painter.end()
         canvas.last_point = event.position().toPoint()
         canvas.update()
