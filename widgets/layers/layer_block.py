@@ -34,7 +34,6 @@ class LayerBlock(QPushButton):
         self.image.setMaximumSize(128, 72)
         self.image_opacity=1
         self.pixmap = self.image.pixmap()
-        self.image.setPixmap(QPixmap("media/drawable_icon.jpg"))
 
         self.move_up_button = QPushButton("Up")
         self.move_up_button.setMaximumSize(75, 25)
