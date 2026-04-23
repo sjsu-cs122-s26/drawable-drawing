@@ -115,4 +115,5 @@ class LayerBlock(QPushButton):
     def updateLayer(self):
         self.image.setPixmap(QPixmap(self.layer.image))
         self.image.update()
+        self.update()
         self.update_block.emit()
