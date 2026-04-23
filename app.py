@@ -187,7 +187,7 @@ class Drawable(QMainWindow):
         dialog = QInputDialog(self)
         dialog.setIntRange(0, 255)
         dialog.setLabelText("Modify Bucket Tolerance")
-        tolerance, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input integer:", 0, 0, 255, 2,)
+        tolerance, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input integer:", self.canvas.bucket_tolerance, 0, 255, 2,)
         if not ok:
             return
         self.canvas.bucket_tolerance = tolerance

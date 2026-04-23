@@ -30,7 +30,6 @@ class Layer(QWidget):
     def paintEvent(self, event):
         QPainter(self).drawImage(self.rect(), self.image, self.image.rect())
         self.layer_updated.emit()
-        print("layer updated")
 
     @override
     def showEvent(self, event):
