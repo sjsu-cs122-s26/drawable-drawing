@@ -26,15 +26,15 @@ class ShapesTool(BaseTool):
 
     @override
     def on_mouse_release(self, canvas, event):
-        self.draw_shape(canvas, canvas.currentLayer.image, event.position().toPoint())
+        self.draw_shape(canvas, canvas.currentLayer.image, event.position().toPoint(), Qt.PenStyle.SolidLine)
         canvas.update()
 
     def draw_preview(self, canvas):
-        self.draw_shape(canvas, canvas, self.current_point)
+        self.draw_shape(canvas, canvas, self.current_point, Qt.PenStyle.DashLine)
     
-    def draw_shape(self, canvas, drawTo, end_point):
+    def draw_shape(self, canvas, drawTo, end_point, style):
         painter = QPainter(drawTo)
-        painter.setPen(QPen(canvas.color, 2, Qt.PenStyle.SolidLine))
+        painter.setPen(QPen(canvas.color, 2, style))
         painter.setBrush(QBrush(canvas.color))
 
         rect = QRect(self.start_point, end_point).normalized()
