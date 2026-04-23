@@ -1,3 +1,4 @@
+from typing import override
 from PySide6 import QtCore, QtGui, QtWidgets
 
 class MiniImage(QtWidgets.QLabel):
@@ -6,9 +7,11 @@ class MiniImage(QtWidgets.QLabel):
         self._pixmap = self.pixmap()
         self._resised= False
     
+    @override
     def resizeEvent(self, event):
         self.setPixmap(self._pixmap)     
 
+    @override
     def setPixmap(self, pixmap): #overiding setPixmap
         if not pixmap:
             return 

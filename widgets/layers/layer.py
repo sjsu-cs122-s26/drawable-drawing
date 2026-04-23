@@ -22,7 +22,7 @@ class Layer(QWidget):
         self.update()
         self.layer_updated.emit()
     
-    def updateOpacity(self, opacity: int):
+    def updateOpacity(self, opacity: float):
         self.opacity = opacity
         self.layer_updated.emit()
 

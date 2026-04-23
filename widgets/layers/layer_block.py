@@ -15,11 +15,18 @@ class LayerBlock(QPushButton):
     def __init__(self, layerName: str, layer: Layer):
         super().__init__()
         self.setFixedSize(229, 125)
+        self.setCheckable(True)
+        self.setStyleSheet('''
+            QPushButton:checked {
+            background-color: #144288;
+            }
+            ''')
         self.layerName = layerName
         self.layer = layer
         self.layer.layer_updated.connect(self.updateLayer)
-
-        topLayout = self.createTopLayout(layerName, layer)
+        self.createLayout(layerName)
+    def createLayout(self, layerName):
+        topLayout = self.createTopLayout(layerName)
         middleLayout = self.createMiddleLayout()
         bottomLayout = self.createBottomLayout()
 
@@ -27,7 +34,7 @@ class LayerBlock(QPushButton):
         layout.addLayout(topLayout)
         layout.addLayout(middleLayout)
         layout.addLayout(bottomLayout)
-    def createTopLayout(self, layerName, layer):
+    def createTopLayout(self, layerName):
         layerDisplayName = QLabel()
         layerDisplayName.setText(layerName)
         self.image = MiniImage()
@@ -58,12 +65,6 @@ class LayerBlock(QPushButton):
         self.delete_layer_button = QPushButton("Delete layer")
         self.delete_layer_button.setMaximumSize(100, 25)
         self.delete_layer_button.clicked.connect(lambda: self.confirmAction("delete", self.delete_layer.emit, self.layer))
-        self.setCheckable(True)
-        self.setStyleSheet('''
-            QPushButton:checked {
-            background-color: #144288;
-            }
-            ''')
         
         middleLayout = QHBoxLayout()
         middleLayout.addWidget(self.clear_layer_button)
