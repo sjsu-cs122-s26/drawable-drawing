@@ -71,8 +71,8 @@ class Drawable(QMainWindow):
         edit_menu.addAction(self.undo_action)
 
         self.redo_action = QAction("Redo")
-        self.undo_action.setShortcut("Ctrl+Y")
-        self.undo_action.triggered.connect(self.canvas.redo)
+        self.redo_action.setShortcut("Ctrl+Y")
+        self.redo_action.triggered.connect(self.canvas.redo)
         edit_menu.addAction(self.redo_action)
 
         self.modify_bucket_action = QAction("Modify Bucket Tolerance")
