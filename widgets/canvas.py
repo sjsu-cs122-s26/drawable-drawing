@@ -10,6 +10,7 @@ from core.tools.pen_tool import PenTool
 from widgets.layers import layer
 from widgets.layers.layer import Layer
 from core.tools.shapes_tool import ShapesTool
+from core.tools.eraser_tool import EraserTool
 
 class Canvas(QWidget):
     def __init__(self):
