@@ -1,4 +1,5 @@
 from typing import override
+from collections import deque
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QColor, QPainter, QImage
@@ -27,6 +28,9 @@ class Canvas(QWidget):
         self.currentLayerIndex = -1
 
         self.bucket_tolerance = 0
+        
+        self._undo_stack = deque(maxlen=50)
+        self._redo_stack = deque(maxlen=50)
         
     def setColor(self, color):
         self.color = color
@@ -69,6 +73,7 @@ class Canvas(QWidget):
         self.shapes_tool = ShapesTool()
         self.tools = {
             "pen": PenTool(),
+            "eraser": EraserTool(),
             "bucket": BucketTool(),
             "shapes": self.shapes_tool
         }
@@ -106,6 +111,30 @@ class Canvas(QWidget):
         painter.setOpacity(0)
         painter.end
         self.compositing = False
+    
+    def saveSnapshot(self):
+        snapshot = [layer.image.copy() for layer in self.layers]
+        self._undo_stack.append(snapshot)
+        self._redo_stack.clear()
+    
+    def undo(self):
+        if not self._undo_stack:
+            return
+        self._redo_stack.append([layer.image.copy() for layer in self.layers])
+        snapshot = self._undo_stack.pop()
+        for layer, image in zip(self.layers, snapshot):
+            layer.image = image
+        self.update()
+    
+    def redo(self):
+        if not self._redo_stack:
+            return
+        self._undo_stack.append([layer.image.copy() for layer in self.layers])
+        snapshot = self._redo_stack.pop()
+        for layer, image in zip(self.layers, snapshot):
+            layer.image = image
+        self.update()
+
 
 
     @override
@@ -136,6 +165,7 @@ class Canvas(QWidget):
     @override
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
+            self.saveSnapshot()
             self.drawing = True
             self.last_point = event.position().toPoint()
             self.current_tool.on_mouse_press(self, event)
