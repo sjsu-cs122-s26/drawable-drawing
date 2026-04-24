@@ -64,6 +64,17 @@ class Drawable(QMainWindow):
 
     def createEditMenu(self, menu_bar):
         edit_menu = menu_bar.addMenu("&Edit")
+
+        self.undo_action = QAction("Undo")
+        self.undo_action.setShortcut("Ctrl+Z")
+        self.undo_action.triggered.connect(self.canvas.undo)
+        edit_menu.addAction(self.undo_action)
+
+        self.redo_action = QAction("Redo")
+        self.undo_action.setShortcut("Ctrl+Y")
+        self.undo_action.triggered.connect(self.canvas.redo)
+        edit_menu.addAction(self.redo_action)
+
         self.modify_bucket_action = QAction("Modify Bucket Tolerance")
         self.modify_bucket_action.setShortcut("Ctrl+Alt+B")
         self.modify_bucket_action.setStatusTip("Modify how similar pixels must be to be affected by the paint bucket tool.")
