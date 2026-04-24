@@ -27,10 +27,10 @@ class Drawable(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
 
-        self.createMenus()
         self.createCentralLayout()
         self.createBottomLayout()
-
+        self.createMenus()
+        
         toolbar = QToolBar("Toolbar")
         self.register_toolbar_widgets(toolbar)
         self.addToolBar(toolbar)
