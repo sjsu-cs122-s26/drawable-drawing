@@ -1,5 +1,5 @@
 from typing import override
-from PySide6.QtGui import QPainter, QBrush, QPen
+from PySide6.QtGui import QPainter, QPen
 from PySide6.QtCore import Qt
 from core.tools.base_tool import BaseTool
 
@@ -11,7 +11,6 @@ class EraserTool(BaseTool):
         painter = QPainter(canvas.currentLayer.image)
         painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear)
         painter.setPen(QPen(Qt.GlobalColor.transparent, self.eraser_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-        painter.setBrush(QBrush(Qt.GlobalColor.transparent))
         painter.drawLine(canvas.last_point, point)
         canvas.last_point = point
         painter.end()
