@@ -1,5 +1,5 @@
 from typing import override
-from datetime import timedelta, datetime
+
 from PySide6.QtWidgets import QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QSlider, QLabel
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Signal, Qt
@@ -24,11 +24,10 @@ class LayerBlock(QPushButton):
             ''')
         self.layerName = layerName
         self.layer = layer
-        self.opacityLastUpdated = datetime.now()
-        self.opacityCooldown = timedelta(milliseconds=500)
         if self.layer:
             self.layer.layer_updated.connect(self.updateLayer)
         self.createLayout(layerName)
+        self.settingLayer = False
 
     def createLayout(self, layerName):
         topLayout = self.createTopLayout(layerName)
@@ -108,21 +107,23 @@ class LayerBlock(QPushButton):
             actionTrue()
 
     def valueChanged(self, position):
-        currTime = datetime.now()
-        if currTime-self.opacityLastUpdated>self.opacityCooldown:
-            self.currTime = datetime.now()
-            self.save_snapshot.emit()
+        if self.settingLayer:
+            return
+        self.save_snapshot.emit()
         self.image_opacity = min(max(float(position)/100, 0), 1)
         self.layer.updateOpacity(self.image_opacity)
         self.updateLayer()
     
     def setState(self, layer : Layer, layerName : str):
+        self.settingLayer = True
+        self.opacity_slider.setSliderPosition(int(layer.opacity*100))
         if self.layer:
             self.layer.layer_updated.disconnect(self.updateLayer)
         self.layer = layer
         self.layerName = layerName
         self.layerDisplayName.setText(layerName)
         self.layer.layer_updated.connect(self.updateLayer)
+        self.settingLayer = False
         self.updateLayer()
 
     def updateLayer(self):
