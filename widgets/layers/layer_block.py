@@ -1,8 +1,8 @@
 from typing import override
-
+from datetime import timedelta, datetime
 from PySide6.QtWidgets import QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QSlider, QLabel
-from PySide6.QtGui import QPixmap, QPainter, QPalette, QImage
-from PySide6.QtCore import Signal, Qt, QBuffer, QIODevice
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Signal, Qt
 
 from widgets.layers.layer import Layer
 from widgets.layers.layer_mini_image import MiniImage
@@ -10,9 +10,10 @@ from widgets.layers.layer_mini_image import MiniImage
 class LayerBlock(QPushButton):
     delete_layer = Signal(Layer)
     update_block = Signal()
-    move = Signal(int)
+    move_block = Signal(int)
+    save_snapshot = Signal()
 
-    def __init__(self, layerName: str, layer: Layer):
+    def __init__(self, layerName: str, layer : Layer = None):
         super().__init__()
         self.setFixedSize(229, 125)
         self.setCheckable(True)
@@ -23,8 +24,12 @@ class LayerBlock(QPushButton):
             ''')
         self.layerName = layerName
         self.layer = layer
-        self.layer.layer_updated.connect(self.updateLayer)
+        self.opacityLastUpdated = datetime.now()
+        self.opacityCooldown = timedelta(milliseconds=500)
+        if self.layer:
+            self.layer.layer_updated.connect(self.updateLayer)
         self.createLayout(layerName)
+
     def createLayout(self, layerName):
         topLayout = self.createTopLayout(layerName)
         middleLayout = self.createMiddleLayout()
@@ -34,9 +39,10 @@ class LayerBlock(QPushButton):
         layout.addLayout(topLayout)
         layout.addLayout(middleLayout)
         layout.addLayout(bottomLayout)
+
     def createTopLayout(self, layerName):
-        layerDisplayName = QLabel()
-        layerDisplayName.setText(layerName)
+        self.layerDisplayName = QLabel()
+        self.layerDisplayName.setText(layerName)
         self.image = MiniImage()
         self.image.setMaximumSize(128, 128)
         self.image_opacity=1
@@ -44,16 +50,16 @@ class LayerBlock(QPushButton):
 
         self.move_up_button = QPushButton("Up")
         self.move_up_button.setMaximumSize(75, 25)
-        self.move_up_button.clicked.connect(lambda x: self.move.emit(-1))
+        self.move_up_button.clicked.connect(lambda x: self.move_block.emit(-1))
         self.move_down_button = QPushButton("Down")
         self.move_down_button.setMaximumSize(75, 25)
-        self.move_down_button.clicked.connect(lambda x: self.move.emit(1))
+        self.move_down_button.clicked.connect(lambda x: self.move_block.emit(1))
         
         topLayout = QHBoxLayout()
         topRightLayout = QVBoxLayout()
         topRightLayout.addWidget(self.move_up_button)
         topRightLayout.addWidget(self.move_down_button)
-        topLayout.addWidget(layerDisplayName)
+        topLayout.addWidget(self.layerDisplayName)
         topLayout.addWidget(self.image)
         topLayout.addLayout(topRightLayout)
         return topLayout
@@ -95,16 +101,30 @@ class LayerBlock(QPushButton):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:
+            self.save_snapshot.emit()
             if actionTrueParameter:
                 actionTrue(actionTrueParameter)
                 return
             actionTrue()
 
     def valueChanged(self, position):
+        currTime = datetime.now()
+        if currTime-self.opacityLastUpdated>self.opacityCooldown:
+            self.currTime = datetime.now()
+            self.save_snapshot.emit()
         self.image_opacity = min(max(float(position)/100, 0), 1)
         self.layer.updateOpacity(self.image_opacity)
         self.updateLayer()
     
+    def setState(self, layer : Layer, layerName : str):
+        if self.layer:
+            self.layer.layer_updated.disconnect(self.updateLayer)
+        self.layer = layer
+        self.layerName = layerName
+        self.layerDisplayName.setText(layerName)
+        self.layer.layer_updated.connect(self.updateLayer)
+        self.updateLayer()
+
     def updateLayer(self):
         self.image.setPixmap(QPixmap(self.layer.image))
         self.update()

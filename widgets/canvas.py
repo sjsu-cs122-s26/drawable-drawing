@@ -3,16 +3,17 @@ from collections import deque
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QColor, QPainter, QImage
-from PySide6.QtCore import Qt, QPoint
+from PySide6.QtCore import Qt, QPoint, Signal
 
 from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
-from widgets.layers import layer
-from widgets.layers.layer import Layer
 from core.tools.shapes_tool import ShapesTool
 from core.tools.eraser_tool import EraserTool
+from core.snapshot import Snapshot
+from widgets.layers.layer import Layer
 
 class Canvas(QWidget):
+    save_snapshot = Signal()
     def __init__(self):
         super().__init__()
         self.setMinimumSize(100,100)
@@ -29,9 +30,6 @@ class Canvas(QWidget):
         self.currentLayerIndex = -1
 
         self.bucket_tolerance = 0
-        
-        self._undo_stack = deque(maxlen=50)
-        self._redo_stack = deque(maxlen=50)
         
     def setColor(self, color):
         self.color = color
@@ -66,6 +64,7 @@ class Canvas(QWidget):
         self.update()
 
     def clear(self):
+        self.save_snapshot.emit()
         for layer in self.layers:
             layer.clear()
         self.update()
@@ -113,30 +112,22 @@ class Canvas(QWidget):
         painter.end
         self.compositing = False
     
-    def saveSnapshot(self):
-        snapshot = [layer.image.copy() for layer in self.layers]
-        self._undo_stack.append(snapshot)
-        self._redo_stack.clear()
-    
-    def undo(self):
-        if not self._undo_stack:
-            return
-        self._redo_stack.append([layer.image.copy() for layer in self.layers])
-        snapshot = self._undo_stack.pop()
-        for layer, image in zip(self.layers, snapshot):
-            layer.image = image
+    def setState(self, snapshot : Snapshot):
+        self.resize(snapshot.canvasSize)
+        while(len(self.layers)<len(snapshot.blocks)):
+            layer = Layer()
+            self.layers.append(layer)
+            layer.layer_updated.connect(lambda : self.update())
+        while (len(self.layers)>len(snapshot.blocks)):
+            layer : Layer = self.layers.pop()
+            layer.layer_updated.disconnect()
+        for layer, block in zip(self.layers, snapshot.blocks):
+            layer.image = block["image"]
+            layer.opacity = block["opacity"]
+        self.currentLayerIndex : int = snapshot.currentLayerIndex
+        self.currentLayer : Layer = self.layers[self.currentLayerIndex]
         self.update()
-    
-    def redo(self):
-        if not self._redo_stack:
-            return
-        self._undo_stack.append([layer.image.copy() for layer in self.layers])
-        snapshot = self._redo_stack.pop()
-        for layer, image in zip(self.layers, snapshot):
-            layer.image = image
-        self.update()
-
-
+        return self.layers
 
     @override
     def paintEvent(self, event):
@@ -166,7 +157,7 @@ class Canvas(QWidget):
     @override
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
-            self.saveSnapshot()
+            self.save_snapshot.emit()
             self.drawing = True
             self.last_point = event.position().toPoint()
             self.current_tool.on_mouse_press(self, event)

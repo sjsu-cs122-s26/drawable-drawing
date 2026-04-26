@@ -1,3 +1,5 @@
+from collections import deque
+
 from PySide6.QtCore import Slot, Qt
 from PySide6.QtGui import QPixmap, QAction, QIcon, QActionGroup, QPalette, QColor
 from PySide6.QtWidgets import (
@@ -14,6 +16,7 @@ from PySide6.QtWidgets import (
     QComboBox
 )
 
+from core.snapshot import Snapshot
 from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
 from widgets.clear import Clear
@@ -34,6 +37,12 @@ class Drawable(QMainWindow):
         toolbar = QToolBar("Toolbar")
         self.register_toolbar_widgets(toolbar)
         self.addToolBar(toolbar)
+        
+        self._undo_stack = deque(maxlen=50)
+        self._redo_stack = deque(maxlen=50)
+        self.canvas.save_snapshot.connect(self.saveSnapshot)
+        self.layer_menu.save_snapshot.connect(self.saveSnapshot)
+
 
     def setWindowParameters(self):
         self.setWindowTitle("Drawable")
@@ -67,12 +76,12 @@ class Drawable(QMainWindow):
 
         self.undo_action = QAction("Undo")
         self.undo_action.setShortcut("Ctrl+Z")
-        self.undo_action.triggered.connect(self.canvas.undo)
+        self.undo_action.triggered.connect(lambda : self.setState(self._undo_stack, self._redo_stack))
         edit_menu.addAction(self.undo_action)
 
         self.redo_action = QAction("Redo")
         self.redo_action.setShortcut("Ctrl+Y")
-        self.redo_action.triggered.connect(self.canvas.redo)
+        self.redo_action.triggered.connect(lambda : self.setState(self._redo_stack, self._undo_stack))
         edit_menu.addAction(self.redo_action)
 
         self.modify_bucket_action = QAction("Modify Bucket Tolerance")
@@ -120,6 +129,7 @@ class Drawable(QMainWindow):
         self.main_layout.addWidget(self.color_wheel)
 
         self.clear = Clear()
+        self.clear.cleared.connect(self.saveSnapshot)
         self.clear.cleared.connect(self.canvas.clear)
         self.main_layout.addWidget(self.clear)
 
@@ -153,6 +163,20 @@ class Drawable(QMainWindow):
                 action.triggered.connect(lambda checked: self.shape_combo.setVisible(False))
                 self.group.addAction(action)
             self.group.addAction(action)
+    
+    def saveSnapshot(self):
+        snapshot = Snapshot(self.canvas.size(), self.layer_menu.layer_blocks, self.canvas.currentLayerIndex, self.layer_menu.lifetime_layers)
+        self._undo_stack.append(snapshot)
+        self._redo_stack.clear()
+
+    @Slot()
+    def setState(self, popStack, pushStack):
+        if not popStack:
+            return
+        pushStack.append(Snapshot(self.canvas.size(), self.layer_menu.layer_blocks, self.canvas.currentLayerIndex, self.layer_menu.lifetime_layers))
+        snapshot = popStack.pop()
+        layers = self.canvas.setState(snapshot)
+        self.layer_menu.setState(snapshot, layers)
 
     @Slot()
     def openFile(self):
@@ -160,6 +184,7 @@ class Drawable(QMainWindow):
         dialog.setNameFilter(("Images (*.png *.jpg)"))
         if not dialog.exec():
             return
+        self.saveSnapshot
         fileName = dialog.selectedFiles()[0]
         self.canvas.loadImage(fileName)
     
