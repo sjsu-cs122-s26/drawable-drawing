@@ -9,6 +9,7 @@ from core.tools.bucket_tool import BucketTool
 from core.tools.pen_tool import PenTool
 from core.tools.shapes_tool import ShapesTool
 from core.tools.eraser_tool import EraserTool
+from core.tools.gradient_tool import GradientTool
 from core.snapshot import Snapshot
 from widgets.layers.layer import Layer
 
@@ -31,8 +32,15 @@ class Canvas(QWidget):
 
         self.bucket_tolerance = 0
         
+        self.primary_color = QColor(Qt.GlobalColor.black)
+        self.secondary_color = QColor(Qt.GlobalColor.white)
+        self.active_color_target = "primary"
+        
     def setColor(self, color):
-        self.color = color
+        if self.active_color_target == "primary":
+            self.primary_color = color
+        else:
+            self.secondary_color = color
 
     def addLayer(self, layer : Layer):
         layer.image = QImage(self.size(), QImage.Format.Format_ARGB32)
@@ -75,7 +83,8 @@ class Canvas(QWidget):
             "pen": PenTool(),
             "eraser": EraserTool(),
             "bucket": BucketTool(),
-            "shapes": self.shapes_tool
+            "shapes": self.shapes_tool,
+            "gradient": GradientTool()
         }
         self.current_tool = None
 

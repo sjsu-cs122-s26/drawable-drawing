@@ -1,4 +1,5 @@
 from collections import deque
+from turtle import color
 
 from PySide6.QtCore import Slot, Qt
 from PySide6.QtGui import QPixmap, QAction, QIcon, QActionGroup, QPalette, QColor
@@ -14,7 +15,8 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QInputDialog,
     QComboBox,
-    QSlider
+    QSlider,
+    QColorDialog
 )
 
 from core.snapshot import Snapshot
@@ -133,13 +135,11 @@ class Drawable(QMainWindow):
 
     def createBottomLayout(self):
         self.color_wheel = ColorWheel()
-        self.color_wheel.color_change.connect(self.canvas.setColor)
-        self.main_layout.addWidget(self.color_wheel)
+        self.color_wheel.color_change.connect(self.onColorPicked)
 
         self.clear = Clear()
         self.clear.cleared.connect(self.saveSnapshot)
         self.clear.cleared.connect(self.canvas.clear)
-        self.main_layout.addWidget(self.clear)
 
         self.shape_combo = QComboBox()
         self.shape_combo.addItems(["Rectangle", "Ellipse", "Triangle", "Line"])
@@ -154,6 +154,19 @@ class Drawable(QMainWindow):
         bottom_layout.addWidget(self.clear)
         bottom_layout.addStretch()
         bottom_layout.addWidget(self.shape_combo)
+        
+        self.primary_btn = QPushButton("Primary")
+        self.secondary_btn = QPushButton("Secondary")
+        
+        self.primary_btn.clicked.connect(self.pickPrimaryColor)
+        self.secondary_btn.clicked.connect(self.pickSecondaryColor)
+        
+        bottom_layout.addWidget(self.primary_btn)
+        bottom_layout.addWidget(self.secondary_btn)
+        
+        self.primary_btn.setVisible(False)
+        self.secondary_btn.setVisible(False)
+        
         self.main_layout.addLayout(bottom_layout)
         
     def register_toolbar_widgets(self, toolbar: QToolBar):
@@ -168,11 +181,6 @@ class Drawable(QMainWindow):
                 lambda checked, name=tool_name: self._on_tool_changed(name)
             )
 
-            def make_shape_handler(name):
-                return lambda checked: self.shape_combo.setVisible(name == "shapes")
-
-            action.triggered.connect(make_shape_handler(tool_name))
-
             self.group.addAction(action)
     
     
@@ -182,12 +190,28 @@ class Drawable(QMainWindow):
         self._redo_stack.clear()
     
     def _on_tool_changed(self, tool_name):
+        print("TOOL SWITCH:", tool_name)
+
         self.canvas.setActiveTool(tool_name)
 
-        active = self.canvas.current_tool 
+        self.pen_sidebar.setVisible(tool_name == "pen")
+        self.primary_btn.setVisible(tool_name == "gradient")
+        self.secondary_btn.setVisible(tool_name == "gradient")
+        self.shape_combo.setVisible(tool_name == "shapes")
+    
+    def pickPrimaryColor(self):
+        color = QColorDialog.getColor(self.canvas.primary_color)
+        if color.isValid():
+            self.canvas.primary_color = color
 
-        self.pen_sidebar.setVisible(active == self.canvas.tools["pen"])
-        self.shape_combo.setVisible(active == self.canvas.tools["shapes"])
+    def pickSecondaryColor(self):
+        color = QColorDialog.getColor(self.canvas.secondary_color)
+        if color.isValid():
+            self.canvas.secondary_color = color
+    
+    def onColorPicked(self, color):
+        self.canvas.color = color
+
     @Slot()
     def setState(self, popStack, pushStack):
         if not popStack:
