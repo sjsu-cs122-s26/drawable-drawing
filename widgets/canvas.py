@@ -166,8 +166,8 @@ class Canvas(QWidget):
     @override
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
-            self.save_snapshot.emit()
             self.drawing = True
+            self.save_snapshot.emit()
             self.last_point = event.position().toPoint()
             self.current_tool.on_mouse_press(self, event)
     
@@ -179,5 +179,5 @@ class Canvas(QWidget):
     @override
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
-            self.drawing = False
             self.current_tool.on_mouse_release(self, event)
+            self.drawing = False

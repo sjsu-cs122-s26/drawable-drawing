@@ -214,15 +214,20 @@ class Drawable(QMainWindow):
 
     @Slot()
     def setState(self, popStack, pushStack):
-        if not popStack:
+        if not popStack or self.canvas.drawing:
             return
+        self.canvas.drawing = True
         pushStack.append(Snapshot(self.canvas.size(), self.layer_menu.layer_blocks, self.canvas.currentLayerIndex, self.layer_menu.lifetime_layers))
         snapshot = popStack.pop()
         layers = self.canvas.setState(snapshot)
         self.layer_menu.setState(snapshot, layers)
+        self.canvas.drawing = False
 
     @Slot()
     def openFile(self):
+        if self.canvas.drawing:
+            return
+        self.canvas.drawing = True
         dialog = QFileDialog(self)
         dialog.setNameFilter(("Images (*.png *.jpg)"))
         if not dialog.exec():
@@ -230,6 +235,8 @@ class Drawable(QMainWindow):
         self.saveSnapshot
         fileName = dialog.selectedFiles()[0]
         self.canvas.loadImage(fileName)
+        self.canvas.drawing = False
+        
     
     @Slot()
     def saveFile(self):
