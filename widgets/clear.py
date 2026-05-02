@@ -7,13 +7,13 @@ class Clear(QWidget):
         super().__init__()
         self.setMaximumHeight(30)
 
-        self.clear_button = QPushButton("Clear")
-        self.clear_button.setFixedSize(150, 30)
-        self.clear_button.clicked.connect(self.confirmClear)
+        clear_button = QPushButton("Clear")
+        clear_button.setFixedSize(150, 30)
+        clear_button.clicked.connect(self.confirmClear)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(1, 1, 1, 1)
-        layout.addWidget(self.clear_button)
+        layout.addWidget(clear_button)
 
 
     def confirmClear(self):

@@ -29,9 +29,9 @@ class Drawable(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowParameters()
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.main_layout = QVBoxLayout(self.central_widget)
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        self.main_layout = QVBoxLayout(central_widget)
 
         self.createCentralLayout()
         self.createBottomLayout()
@@ -110,9 +110,9 @@ class Drawable(QMainWindow):
         self.pen_sidebar = self.canvas.tools["pen"].sidebar
         self.pen_sidebar.setVisible(False)
         
-        self.scrollAreaCanvas = QScrollArea()
-        self.scrollAreaCanvas.setWidget(self.canvas)
-        self.scrollAreaCanvas.setBackgroundRole(QPalette.Dark)
+        scrollAreaCanvas = QScrollArea()
+        scrollAreaCanvas.setWidget(self.canvas)
+        scrollAreaCanvas.setBackgroundRole(QPalette.Dark)
 
         self.layer_menu = LayerMenu()
         self.layer_menu.delete_layer_validated.connect(self.canvas.deleteLayer)
@@ -120,14 +120,14 @@ class Drawable(QMainWindow):
         self.layer_menu.switch_layer.connect(self.canvas.switchActiveLayer)
         self.layer_menu.swap_layer.connect(self.canvas.swapLayerOrder)
         self.layer_menu.addLayer()
-        self.scrollAreaLayerMenu = QScrollArea()
-        self.scrollAreaLayerMenu.setMaximumWidth(250)
-        self.scrollAreaLayerMenu.setWidget(self.layer_menu)
-        self.scrollAreaLayerMenu.setBackgroundRole(QPalette.Dark)
+        scrollAreaLayerMenu = QScrollArea()
+        scrollAreaLayerMenu.setMaximumWidth(250)
+        scrollAreaLayerMenu.setWidget(self.layer_menu)
+        scrollAreaLayerMenu.setBackgroundRole(QPalette.Dark)
 
         central_layout = QHBoxLayout()
-        central_layout.addWidget(self.scrollAreaLayerMenu)
-        central_layout.addWidget(self.scrollAreaCanvas)
+        central_layout.addWidget(scrollAreaLayerMenu)
+        central_layout.addWidget(scrollAreaCanvas)
         central_layout.addWidget(self.pen_sidebar)
         self.main_layout.addLayout(central_layout)
 
