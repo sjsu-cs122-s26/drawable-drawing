@@ -2,6 +2,7 @@ from typing import override
 
 from core.tools.base_tool import BaseTool
 from PySide6.QtGui import QColor
+from tests.cpu_test import log_action
 
 class BucketTool(BaseTool):
     @override
@@ -15,12 +16,14 @@ class BucketTool(BaseTool):
         self.target_color = canvas.currentLayer.image.pixelColor(x, y)
         self.fill_color = canvas.color
         self.tolerance = canvas.bucket_tolerance
-        if self.fill_color==self.target_color:
+        if self.fill_color == self.target_color:
             return
 
         width = canvas.currentLayer.image.width()
         height = canvas.currentLayer.image.height()
         
+        pixels_changed = 0
+
         stack = [(x, y)]
         while stack:
             curr_x, curr_y = stack.pop()
@@ -28,12 +31,14 @@ class BucketTool(BaseTool):
             while lx >= 0 and self.checkDistance(canvas.currentLayer.image.pixelColor(lx, curr_y)):
                 canvas.currentLayer.image.setPixelColor(lx, curr_y, self.fill_color)
                 lx -= 1
+                pixels_changed += 1
             lx += 1
 
             rx = curr_x + 1
             while rx < width and self.checkDistance(canvas.currentLayer.image.pixelColor(rx, curr_y)):
                 canvas.currentLayer.image.setPixelColor(rx, curr_y, self.fill_color)
                 rx += 1
+                pixels_changed += 1
             rx -= 1
 
             if curr_y > 0:
@@ -42,6 +47,7 @@ class BucketTool(BaseTool):
                 self._scan_line(lx, rx, curr_y + 1, stack, canvas)
 
         canvas.update()
+        log_action("bucket", pixels_changed)
 
     def _scan_line(self, lx, rx, y, stack, canvas):
         added_seed = False
@@ -52,10 +58,10 @@ class BucketTool(BaseTool):
                     added_seed = True
             else:
                 added_seed = False
+
     def checkDistance(self, color1: QColor):
         return round(((color1.red() - self.target_color.red())**2
                       +(color1.blue() - self.target_color.blue())**2
                       +(color1.green() - self.target_color.green())**2
                       +(color1.alpha() - self.target_color.alpha())**2)
                       **(1/2))<=self.tolerance
-
