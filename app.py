@@ -134,12 +134,12 @@ class Drawable(QMainWindow):
         
 
     def createBottomLayout(self):
-        self.color_wheel = ColorWheel()
-        self.color_wheel.color_change.connect(self.onColorPicked)
+        color_wheel = ColorWheel()
+        color_wheel.color_change.connect(self.onColorPicked)
 
-        self.clear = Clear()
-        self.clear.cleared.connect(self.saveSnapshot)
-        self.clear.cleared.connect(self.canvas.clear)
+        clear = Clear()
+        clear.cleared.connect(self.saveSnapshot)
+        clear.cleared.connect(self.canvas.clear)
 
         self.shape_combo = QComboBox()
         self.shape_combo.addItems(["Rectangle", "Ellipse", "Triangle", "Line"])
@@ -150,8 +150,8 @@ class Drawable(QMainWindow):
         bottom_layout = QHBoxLayout()
         bottom_layout.setContentsMargins(0, 0, 0, 0)
         bottom_layout.setSpacing(0)
-        bottom_layout.addWidget(self.color_wheel)
-        bottom_layout.addWidget(self.clear)
+        bottom_layout.addWidget(color_wheel)
+        bottom_layout.addWidget(clear)
         bottom_layout.addStretch()
         bottom_layout.addWidget(self.shape_combo)
         
