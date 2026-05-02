@@ -125,11 +125,11 @@ class Drawable(QMainWindow):
         self.scrollAreaLayerMenu.setWidget(self.layer_menu)
         self.scrollAreaLayerMenu.setBackgroundRole(QPalette.Dark)
 
-        self.central_layout = QHBoxLayout()
-        self.central_layout.addWidget(self.scrollAreaLayerMenu)
-        self.central_layout.addWidget(self.scrollAreaCanvas)
-        self.central_layout.addWidget(self.pen_sidebar)
-        self.main_layout.addLayout(self.central_layout)
+        central_layout = QHBoxLayout()
+        central_layout.addWidget(self.scrollAreaLayerMenu)
+        central_layout.addWidget(self.scrollAreaCanvas)
+        central_layout.addWidget(self.pen_sidebar)
+        self.main_layout.addLayout(central_layout)
 
         
 
