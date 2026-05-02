@@ -8,7 +8,6 @@ class LayerMenuStatic(QWidget):
         super().__init__()
         self.setMaximumWidth(200)
         self.setMaximumHeight(50)
-        self.layer_blocks = []
 
         self.add_layer_button = QPushButton("Add Layer")
         self.add_layer_button.clicked.connect(self.addLayer)
