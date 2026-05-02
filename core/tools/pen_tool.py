@@ -1,16 +1,14 @@
 from typing import override
-
 from PySide6.QtGui import QPainter, QPen
 from PySide6.QtCore import Qt
-
 from core.tools.base_tool import BaseTool
-
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSlider, QLabel
-
+from tests.cpu_test import log_action
 
 class PenTool(BaseTool):
     def __init__(self):
         self.pen_width = 3
+        self.pixels_changed = 0
         self.sidebar = self._create_sidebar()
     
     def _create_sidebar(self):
@@ -41,5 +39,13 @@ class PenTool(BaseTool):
         painter.setPen(QPen(canvas.color, self.pen_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.drawLine(canvas.last_point, event.position().toPoint())
         painter.end()
+
+        self.pixels_changed += self.pen_width * self.pen_width
+
         canvas.last_point = event.position().toPoint()
         canvas.update()
+
+    @override
+    def on_mouse_release(self, canvas, event):
+        log_action("drawing", self.pixels_changed)
+        self.pixels_changed = 0
