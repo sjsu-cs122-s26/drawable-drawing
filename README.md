@@ -30,4 +30,4 @@ Stop the app by pressing `Ctrl+C` on Windows or `Command+C` on a Mac.
 
 ## 4. Application Usage
 
-Drawable is able to draw basic shapes, draw on the coursor, erase, save files, load files, and track performance. 
+Drawable is able to draw basic shapes, draw on the cursor, erase, save files, load files, and track performance. 
