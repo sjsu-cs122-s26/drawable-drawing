@@ -8,21 +8,21 @@ python3 -m venv .venv
 .venv\Scripts\activate
 ```
 
-To exit the virtual environment, you can run
+To exit the virtual environment, you can run:
 ```bash
 deactivate
 ```
 
 ## 2. Download dependencies
 
-Install dependencies by running the following command in the terminal while in a virtual environment.
+Install dependencies by running the following command in the terminal while in a virtual environment:
 
 ```bash
 pip install -r requirements.txt
 ```
 ## 3. Start application
 
-Start the program with the following command in the terminal while in a virtual environment.
+Start the program with the following command in the terminal while in a virtual environment:
 ```zsh
 python3.14 app.py
 ```
