@@ -1,67 +1,62 @@
+import numpy as np
+from scipy import ndimage
 from typing import override
-
 from core.tools.base_tool import BaseTool
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QImage
 from tests.cpu_test import log_action
 
 class BucketTool(BaseTool):
     @override
     def on_mouse_press(self, canvas, event):
-        start_point = event.position().toPoint()
-        x, y = start_point.x(), start_point.y()
+        # 1. Capture the image and ensure it's in a predictable 32-bit format
+        img = canvas.currentLayer.image
+        if img.format() != QImage.Format.Format_RGBA8888:
+            img = img.convertToFormat(QImage.Format.Format_RGBA8888)
+            canvas.currentLayer.image = img
+
+        point = event.position().toPoint()
+        width, height = img.width(), img.height()
         
-        if not canvas.currentLayer.image.rect().contains(start_point):
+        if not img.rect().contains(point):
             return
 
-        self.target_color = canvas.currentLayer.image.pixelColor(x, y)
-        self.fill_color = canvas.color
-        self.tolerance = canvas.bucket_tolerance
-        if self.fill_color == self.target_color:
+        ptr = img.bits()
+        stride = img.bytesPerLine()
+        arr = np.frombuffer(ptr, np.uint8).reshape((height, stride // 4, 4))
+        arr = arr[:, :width, :]
+
+        target_color = arr[point.y(), point.x()].astype(np.int32).copy()
+        
+        fill_color = np.array([
+            canvas.color.red(), 
+            canvas.color.green(), 
+            canvas.color.blue(), 
+            canvas.color.alpha()
+        ], dtype=np.uint8)
+
+        if np.array_equal(target_color.astype(np.uint8), fill_color):
             return
 
-        width = canvas.currentLayer.image.width()
-        height = canvas.currentLayer.image.height()
+        diff = arr.astype(np.int32) - target_color
+        dist_sq = np.sum(diff**2, axis=2)
         
-        pixels_changed = 0
+        mask = dist_sq <= (canvas.bucket_tolerance ** 2)
 
-        stack = [(x, y)]
-        while stack:
-            curr_x, curr_y = stack.pop()
-            lx = curr_x
-            while lx >= 0 and self.checkDistance(canvas.currentLayer.image.pixelColor(lx, curr_y)):
-                canvas.currentLayer.image.setPixelColor(lx, curr_y, self.fill_color)
-                lx -= 1
-                pixels_changed += 1
-            lx += 1
+        structure = [[0, 1, 0],
+                     [1, 1, 1],
+                     [0, 1, 0]]
+        
+        labels, _ = ndimage.label(mask, structure=structure)
+        
+        target_label = labels[point.y(), point.x()]
+        
+        if target_label == 0:
+            return
 
-            rx = curr_x + 1
-            while rx < width and self.checkDistance(canvas.currentLayer.image.pixelColor(rx, curr_y)):
-                canvas.currentLayer.image.setPixelColor(rx, curr_y, self.fill_color)
-                rx += 1
-                pixels_changed += 1
-            rx -= 1
+        arr[labels == target_label] = fill_color
 
-            if curr_y > 0:
-                self._scan_line(lx, rx, curr_y - 1, stack, canvas)
-            if curr_y < height - 1:
-                self._scan_line(lx, rx, curr_y + 1, stack, canvas)
-
-        canvas.update()
+        changed_mask = (labels == target_label)
+        pixels_changed = np.sum(changed_mask)
         log_action("bucket", pixels_changed)
-
-    def _scan_line(self, lx, rx, y, stack, canvas):
-        added_seed = False
-        for x in range(lx, rx + 1):
-            if self.checkDistance(canvas.currentLayer.image.pixelColor(x, y)):
-                if not added_seed:
-                    stack.append((x, y))
-                    added_seed = True
-            else:
-                added_seed = False
-
-    def checkDistance(self, color1: QColor):
-        return round(((color1.red() - self.target_color.red())**2
-                      +(color1.blue() - self.target_color.blue())**2
-                      +(color1.green() - self.target_color.green())**2
-                      +(color1.alpha() - self.target_color.alpha())**2)
-                      **(1/2))<=self.tolerance
+        
+        canvas.update()
