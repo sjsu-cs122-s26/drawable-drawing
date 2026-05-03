@@ -14,6 +14,7 @@ class CpuTest():
         self.canvasArea = 0
         self.layers = 0
         self.lock = threading.Lock()
+        self.process.cpu_percent(interval=None) #The first value is always 0, so this is getting rid of the filler value
 
     def get_connection(self):
         conn = sqlite3.connect(DB_PATH)
