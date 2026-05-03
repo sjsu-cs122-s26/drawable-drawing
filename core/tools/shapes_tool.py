@@ -4,7 +4,6 @@ from PySide6.QtGui import QPainter, QPen, QBrush, QPolygon
 from PySide6.QtCore import Qt, QRect, QPoint
 
 from core.tools.base_tool import BaseTool
-from tests.cpu_test import log_action
 
 class ShapesTool(BaseTool):
     def __init__(self):
@@ -33,7 +32,7 @@ class ShapesTool(BaseTool):
 
         rect = QRect(self.start_point, end_point).normalized()
         pixels_changed = rect.width() * rect.height()
-        log_action(f"shape_{self.shape}", pixels_changed)
+        canvas.finishTest(f"shape_{self.shape}", pixels_changed)
 
     def draw_preview(self, canvas):
         self.draw_shape(canvas, canvas, self.current_point, Qt.PenStyle.DashLine)

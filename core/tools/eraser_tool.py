@@ -2,7 +2,6 @@ from typing import override
 from PySide6.QtGui import QPainter, QPen
 from PySide6.QtCore import Qt
 from core.tools.base_tool import BaseTool
-from tests.cpu_test import log_action
 
 class EraserTool(BaseTool):
     def __init__(self):
@@ -31,5 +30,5 @@ class EraserTool(BaseTool):
 
     @override
     def on_mouse_release(self, canvas, event):
-        log_action("erasing", self.pixels_changed)
+        canvas.finishTest("erasing", self.pixels_changed)
         self.pixels_changed = 0

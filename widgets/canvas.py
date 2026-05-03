@@ -1,5 +1,6 @@
 from typing import override
 from collections import deque
+import threading
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QColor, QPainter, QImage
@@ -15,6 +16,9 @@ from widgets.layers.layer import Layer
 
 class Canvas(QWidget):
     save_snapshot = Signal()
+    start_test = Signal()
+    update_test_parameters = Signal(int, int)
+    finish_test = Signal(str, int)
     def __init__(self):
         super().__init__()
         self.setMinimumSize(100,100)
@@ -49,6 +53,7 @@ class Canvas(QWidget):
         self.currentLayerIndex = len(self.layers)-1
         self.currentLayer = self.layers[self.currentLayerIndex]
         layer.layer_updated.connect(lambda : self.update())
+        self.update_test_parameters.emit(self.width()*self.height(), len(self.layers))
         
     def deleteLayer(self, layer):
         self.layers.remove(layer)
@@ -56,6 +61,7 @@ class Canvas(QWidget):
             self.currentLayerIndex = len(self.layers)-1
             self.currentLayer=self.layers[self.currentLayerIndex]
         self.update()
+        self.update_test_parameters.emit(self.width()*self.height(), len(self.layers))
     
     def switchActiveLayer(self, layer):
         self.currentLayer = layer
@@ -136,7 +142,11 @@ class Canvas(QWidget):
         self.currentLayerIndex : int = snapshot.currentLayerIndex
         self.currentLayer : Layer = self.layers[self.currentLayerIndex]
         self.update()
+        self.update_test_parameters.emit(self.width()*self.height(), len(self.layers))
         return self.layers
+
+    def finishTest(self, action : str, pixels_changed: int):
+        self.finish_test.emit(action, pixels_changed)
 
     @override
     def paintEvent(self, event):
@@ -157,6 +167,7 @@ class Canvas(QWidget):
             painter.drawImage(0, 0, original_image)
             painter.end()
             layer.image = new_image
+        self.update_test_parameters.emit(self.width()*self.height(), len(self.layers))
         self.resizing = False
 
     @override
@@ -166,6 +177,7 @@ class Canvas(QWidget):
     @override
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.current_tool:
+            self.start_test.emit()
             self.drawing = True
             self.save_snapshot.emit()
             self.last_point = event.position().toPoint()

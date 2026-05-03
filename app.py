@@ -1,5 +1,6 @@
 from collections import deque
 from turtle import color
+import threading
 
 from PySide6.QtCore import Slot, Qt
 from PySide6.QtGui import QPixmap, QAction, QIcon, QActionGroup, QPalette, QColor
@@ -24,10 +25,14 @@ from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
 from widgets.clear import Clear
 from widgets.layers.layer_menu import LayerMenu
+from tests import cpu_test
 
 class Drawable(QMainWindow):
-    def __init__(self):
+    def __init__(self, tester: cpu_test.CpuTest):
         super().__init__()
+        self.tester = tester
+        self.lastTest = None
+
         self.setWindowParameters()
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -125,13 +130,15 @@ class Drawable(QMainWindow):
         scrollAreaLayerMenu.setWidget(self.layer_menu)
         scrollAreaLayerMenu.setBackgroundRole(QPalette.Dark)
 
+        self.canvas.start_test.connect(self.startTest)
+        self.canvas.update_test_parameters.connect(self.updateTestParameters)
+        self.canvas.finish_test.connect(self.finishTest)
+
         central_layout = QHBoxLayout()
         central_layout.addWidget(scrollAreaLayerMenu)
         central_layout.addWidget(scrollAreaCanvas)
         central_layout.addWidget(self.pen_sidebar)
         self.main_layout.addLayout(central_layout)
-
-        
 
     def createBottomLayout(self):
         color_wheel = ColorWheel()
@@ -211,6 +218,27 @@ class Drawable(QMainWindow):
     
     def onColorPicked(self, color):
         self.canvas.color = color
+
+    def startTest(self):
+        if self.lastTest:
+            self.threadTerminate.set() #Should never occur in normal procedure. Exists purely as a failsafe.
+        self.threadInfoSent = threading.Event()
+        self.threadTerminate = threading.Event()
+        self.threadInfoQueue = deque(maxlen=2)
+        self.lastTest = threading.Thread(target=self.tester.prep_log, args=(self.threadInfoSent, self.threadTerminate, self.threadInfoQueue,), daemon=True)
+        self.lastTest.start()
+    
+    def updateTestParameters(self, size : int, layerCount : int):
+        thread = threading.Thread(target=self.tester.updateParameters, args=(size, layerCount,), daemon=True)
+        thread.start()
+
+    def finishTest(self, action : str, pixels_changed: int):
+        if not self.lastTest:
+            return
+        self.threadInfoQueue.append(pixels_changed)
+        self.threadInfoQueue.append(action)
+        self.threadInfoSent.set()
+        self.lastTest = None
 
     @Slot()
     def setState(self, popStack, pushStack):

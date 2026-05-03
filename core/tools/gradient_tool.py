@@ -2,8 +2,6 @@ from PySide6.QtGui import QPainter, QLinearGradient, QBrush
 from PySide6.QtCore import QPoint
 
 from core.tools.base_tool import BaseTool
-from tests.cpu_test import log_action
-
 
 class GradientTool(BaseTool):
     def __init__(self):
@@ -24,7 +22,7 @@ class GradientTool(BaseTool):
 
     def apply_gradient(self, canvas):
         if self.start_point is None or self.end_point is None:
-            return
+            canvas.finishTest("gradient", 0)
 
         gradient = QLinearGradient(self.start_point, self.end_point)
 
@@ -44,4 +42,4 @@ class GradientTool(BaseTool):
 
         width = canvas.currentLayer.image.width()
         height = canvas.currentLayer.image.height()
-        log_action("gradient", width * height)
+        canvas.finishTest("gradient", width * height)

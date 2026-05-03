@@ -3,7 +3,6 @@ from scipy import ndimage
 from typing import override
 from core.tools.base_tool import BaseTool
 from PySide6.QtGui import QImage
-from tests.cpu_test import log_action
 
 class BucketTool(BaseTool):
     @override
@@ -18,7 +17,7 @@ class BucketTool(BaseTool):
         width, height = img.width(), img.height()
         
         if not img.rect().contains(point):
-            return
+            canvas.finishTest("bucket", 0)
 
         ptr = img.bits()
         stride = img.bytesPerLine()
@@ -35,7 +34,7 @@ class BucketTool(BaseTool):
         ], dtype=np.uint8)
 
         if np.array_equal(target_color.astype(np.uint8), fill_color):
-            return
+            canvas.finishTest("bucket", 0)
 
         diff = arr.astype(np.int32) - target_color
         dist_sq = np.sum(diff**2, axis=2)
@@ -51,12 +50,11 @@ class BucketTool(BaseTool):
         target_label = labels[point.y(), point.x()]
         
         if target_label == 0:
-            return
+            canvas.finishTest("bucket", 0)
 
         arr[labels == target_label] = fill_color
 
         changed_mask = (labels == target_label)
         pixels_changed = np.sum(changed_mask)
-        log_action("bucket", pixels_changed)
-        
         canvas.update()
+        canvas.finishTest("bucket", pixels_changed)

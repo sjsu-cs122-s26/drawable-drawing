@@ -3,7 +3,6 @@ from PySide6.QtGui import QPainter, QPen
 from PySide6.QtCore import Qt
 from core.tools.base_tool import BaseTool
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSlider, QLabel
-from tests.cpu_test import log_action
 
 class PenTool(BaseTool):
     def __init__(self):
@@ -47,5 +46,5 @@ class PenTool(BaseTool):
 
     @override
     def on_mouse_release(self, canvas, event):
-        log_action("drawing", self.pixels_changed)
+        canvas.finishTest("drawing", self.pixels_changed)
         self.pixels_changed = 0
