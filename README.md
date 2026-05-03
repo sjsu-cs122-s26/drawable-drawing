@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 Start the program with the following command in the terminal while in a virtual environment:
 ```zsh
-python3.14 app.py
+python3.14 main.py
 ```
 Stop the app by pressing `Ctrl+C` on Windows or `Command+C` on a Mac.
 
