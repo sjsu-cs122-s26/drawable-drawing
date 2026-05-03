@@ -83,7 +83,7 @@ class CpuTest():
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
                 "INSERT INTO performance (timestamp, cpu_usage, rss, vms, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (timestamp, cpu, rss, vms, "preparing action", 0, self.canvasArea, self.layers)
+                (timestamp, cpu, rss, vms, action, pixels_changed, self.canvasArea, self.layers)
             )
             conn.commit()
             print(f"Action: preparing action | Pixels: 0 | Canvas Size: {self.canvasArea} | Layers: {self.layers} | CPU: {cpu}% | RSS: {rss} | VMS: {vms}")
@@ -107,7 +107,7 @@ class CpuTest():
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     cursor.execute(
                     "INSERT INTO performance (timestamp, cpu_usage, rss, vms, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (timestamp, cpu, rss, vms, "preparing action", 0, self.canvasArea, self.layers)
+                    (timestamp, cpu, rss, vms, "idle", 0, self.canvasArea, self.layers)
                     )
                     conn.commit()
                     print(f"CPU: {cpu}%, | RSS: {rss} | VMS: {vms} at {timestamp}")
