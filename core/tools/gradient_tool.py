@@ -23,6 +23,7 @@ class GradientTool(BaseTool):
     def apply_gradient(self, canvas):
         if self.start_point is None or self.end_point is None:
             canvas.finishTest("gradient", 0)
+            return
 
         gradient = QLinearGradient(self.start_point, self.end_point)
 

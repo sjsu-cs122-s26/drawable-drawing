@@ -18,6 +18,7 @@ class BucketTool(BaseTool):
         
         if not img.rect().contains(point):
             canvas.finishTest("bucket", 0)
+            return
 
         ptr = img.bits()
         stride = img.bytesPerLine()
@@ -35,6 +36,7 @@ class BucketTool(BaseTool):
 
         if np.array_equal(target_color.astype(np.uint8), fill_color):
             canvas.finishTest("bucket", 0)
+            return
 
         diff = arr.astype(np.int32) - target_color
         dist_sq = np.sum(diff**2, axis=2)
@@ -51,6 +53,7 @@ class BucketTool(BaseTool):
         
         if target_label == 0:
             canvas.finishTest("bucket", 0)
+            return
 
         arr[labels == target_label] = fill_color
 
