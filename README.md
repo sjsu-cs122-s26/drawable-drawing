@@ -1,21 +1,33 @@
 # Drawable Drawing
 Primitive drawing software
 
-## 1. Download dependencies
+## 1. Setting up environment
+Open the project in an IDE, such as VSCode. In the terminal, create a virtual environment. For Windows, you can run the following commands:
+```bash
+python3 -m venv .venv
+.venv\Scripts\activate
+```
 
-Install dependencies by running the following command.
+To exit the virtual environment, you can run:
+```bash
+deactivate
+```
+
+## 2. Download dependencies
+
+Install dependencies by running the following command in the terminal while in a virtual environment:
 
 ```bash
 pip install -r requirements.txt
 ```
-## 2. Start application
+## 3. Start application
 
-Start the program with the following command in the terminal
+Start the program with the following command in the terminal while in a virtual environment:
 ```zsh
-python3.14 app.py
+python3.14 main.py
 ```
 Stop the app by pressing `Ctrl+C` on Windows or `Command+C` on a Mac.
 
-## 3. Application Usage
+## 4. Application Usage
 
-Application functionality is currently in development, but currently, pressing the `Open File` button will prompt the user to select a `.png` or `.jpg` file. The file will then be displayed in the app.
+Drawable is able to draw basic shapes, draw on the cursor, erase, save files, load files, and track performance. 
