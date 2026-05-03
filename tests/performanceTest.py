@@ -24,16 +24,19 @@ class CpuTest():
         cursor = conn.cursor()
 
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS cpu_usage (
+            CREATE TABLE IF NOT EXISTS performance (
                 id INTEGER PRIMARY KEY,
                 timestamp TEXT,
-                usage REAL,
+                cpu_usage REAL,
+                rss INTEGER,
+                vms INTEGER,
                 action TEXT,
                 pixels_changed INTEGER,
                 canvas_area INTEGER,
                 layers INTEGER
             )
-        """)
+        """) # rss = resident set size (non-swapped physical memory)
+            # vms = virtual memory size (total amount of virtual memory used)
         conn.commit()
         conn.close()
 
@@ -47,14 +50,18 @@ class CpuTest():
             with self.lock:
                 conn = self.get_connection()
                 cursor = conn.cursor()
-                cpu = self.process.cpu_percent(interval=None)/(psutil.cpu_count())
+                with self.process.oneshot():
+                    cpu = self.process.cpu_percent(interval=None)/(psutil.cpu_count())
+                    memory = list(self.process.memory_info())
+                    rss = memory[0]
+                    vms = memory[1]
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 cursor.execute(
-                    "INSERT INTO cpu_usage (timestamp, usage, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?)",
-                    (timestamp, cpu, "preparing action", 0, self.canvasArea, self.layers)
+                    "INSERT INTO performance (timestamp, cpu_usage, rss, vms, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (timestamp, cpu, rss, vms, "preparing action", 0, self.canvasArea, self.layers)
                 )
                 conn.commit()
-                print(f"Action: preparing action | Pixels: 0 | Canvas Size : {self.canvasArea} | Layers : {self.layers} | CPU: {cpu}%")
+                print(f"Action: preparing action | Pixels: 0 | Canvas Size: {self.canvasArea} | Layers: {self.layers} | CPU: {cpu}% | RSS: {rss} | VMS: {vms}")
                 conn.close
                 while not (infoSent.is_set() or terminate.is_set()):
                     time.sleep(1)
@@ -68,15 +75,19 @@ class CpuTest():
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
-            cpu = self.process.cpu_percent(interval=None)/(psutil.cpu_count())
+            with self.process.oneshot():
+                cpu = self.process.cpu_percent(interval=None)/(psutil.cpu_count())
+                memory = list(self.process.memory_info())
+                rss = memory[0]
+                vms = memory[1]
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
-                "INSERT INTO cpu_usage (timestamp, usage, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?)",
-                (timestamp, cpu, action, pixels_changed, self.canvasArea, self.layers)
+                "INSERT INTO performance (timestamp, cpu_usage, rss, vms, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (timestamp, cpu, rss, vms, "preparing action", 0, self.canvasArea, self.layers)
             )
             conn.commit()
-            conn.close()
-            print(f"Action: {action} | Pixels: {pixels_changed} | Canvas Size : {self.canvasArea} | Layers : {self.layers} | CPU: {cpu}%")
+            print(f"Action: preparing action | Pixels: 0 | Canvas Size: {self.canvasArea} | Layers: {self.layers} | CPU: {cpu}% | RSS: {rss} | VMS: {vms}")
+            conn.close
         except Exception as e:
             print(f"DB ERROR: {e}")
 
@@ -88,14 +99,18 @@ class CpuTest():
         while True:
             try:
                 with self.lock:
-                    cpu = self.process.cpu_percent(interval=1)/(psutil.cpu_count())
+                    with self.process.oneshot():
+                        cpu = self.process.cpu_percent(interval=None)/(psutil.cpu_count())
+                        memory = list(self.process.memory_info())
+                        rss = memory[0]
+                        vms = memory[1]
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     cursor.execute(
-                        "INSERT INTO cpu_usage (timestamp, usage, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?)",
-                        (timestamp, cpu, "idle", 0, self.canvasArea, self.layers)
+                    "INSERT INTO performance (timestamp, cpu_usage, rss, vms, action, pixels_changed, canvas_area, layers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (timestamp, cpu, rss, vms, "preparing action", 0, self.canvasArea, self.layers)
                     )
                     conn.commit()
-                    print(f"CPU: {cpu}% at {timestamp}")
+                    print(f"CPU: {cpu}%, | RSS: {rss} | VMS: {vms} at {timestamp}")
             except Exception as e:
                 print(f"DB ERROR: {e}")
             time.sleep(1)

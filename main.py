@@ -4,7 +4,7 @@ import threading
 from PySide6.QtWidgets import QApplication
 from psutil import Process
 
-from tests.cpu_test import CpuTest
+from tests.performanceTest import CpuTest
 from app import Drawable 
 
 def main():

@@ -25,10 +25,10 @@ from widgets.color_wheel import ColorWheel
 from widgets.canvas import Canvas
 from widgets.clear import Clear
 from widgets.layers.layer_menu import LayerMenu
-from tests import cpu_test
+from tests import performanceTest
 
 class Drawable(QMainWindow):
-    def __init__(self, tester: cpu_test.CpuTest):
+    def __init__(self, tester: performanceTest.CpuTest):
         super().__init__()
         self.tester = tester
         self.lastTest = None
