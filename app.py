@@ -264,7 +264,7 @@ class Drawable(QMainWindow):
         dialog = QInputDialog(self)
         dialog.setIntRange(0, 255)
         dialog.setLabelText("Modify Bucket Tolerance")
-        tolerance, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input integer:", self.canvas.bucket_tolerance, 0, 255, 2,)
+        tolerance, ok = dialog.getInt(self, "QInputDialog::getInt()", "Input integer:", self.canvas.bucket_tolerance, 0, 510, 2,) #510 = sqrt(4*(255)^2); 4 from the total number of variables (red, green, blue, alpha). 255 from difference between max distance of each variable (0 to 255).
         if not ok:
             return
         self.canvas.bucket_tolerance = tolerance
