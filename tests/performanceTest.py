@@ -87,7 +87,7 @@ class CpuTest():
                 (timestamp, cpu, rss, vms, action, pixels_changed, self.canvasArea, self.layers)
             )
             conn.commit()
-            print(f"Action: preparing action | Pixels: 0 | Canvas Size: {self.canvasArea} | Layers: {self.layers} | CPU: {cpu}% | RSS: {rss} | VMS: {vms}")
+            print(f"Action: {action} | Pixels: 0 | Canvas Size: {self.canvasArea} | Layers: {self.layers} | CPU: {cpu}% | RSS: {rss} | VMS: {vms}")
             conn.close
         except Exception as e:
             print(f"DB ERROR: {e}")
