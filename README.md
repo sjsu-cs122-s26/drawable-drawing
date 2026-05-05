@@ -18,7 +18,7 @@ deactivate
 Install dependencies by running the following command in the terminal while in a virtual environment:
 
 ```bash
-pip install -r requirements.txt
+python3.14 -m pip install -r requirements.txt
 ```
 ## 3. Start application
 
